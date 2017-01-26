@@ -1,68 +1,53 @@
-cmake_minimum_required(VERSION 3.1)
-project(CppNumericalSolvers)
+cmake_minimum_required(VERSION 3.6)
 
-option(BUILD_TESTING "Build tests" ON)
-option(BUILD_EXAMPLES "Build examples" ON)
 
-set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin )
-set( CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin )
+#============= PROJECT cppoptlib ===================
+project(cppoptlib)
 
-# check existence of c++11 compiler
-if(NOT CMAKE_CXX_STANDARD) # don't override
-    set(CMAKE_CXX_STANDARD 11)
-endif()
+set ( PROJECT_FOLDER_NAME ${PROJECT_NAME})
 
-# set path to cmake modules
-list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/Modules)
-set(LINKER_LIBS "")
+set ( PROJECT_PATH ${PROJECT_NAME})
+set ( OUTPUT_NAME "${PROJECT_FOLDER_NAME}" )
+message ( "-- ++ CREATING PROJECT OR MAKEFILE ---> ${OUTPUT_NAME}" )
 
-if(BUILD_TESTING)
-    # Google Testing Framework
-    add_subdirectory(gtest)
-    include_directories(gtest)
-endif()
+set(CMAKE_CXX_FLAGS "-g -Wall")
 
+# Find Eigen lib
 find_package(Eigen3 REQUIRED)
-include_directories(SYSTEM ${EIGEN3_INCLUDE_DIR})
 
-add_library(cppoptlib INTERFACE)
-target_include_directories(cppoptlib INTERFACE
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>)
-if(TARGET ::Eigen3)
-    target_link_libraries(cppoptlib INTERFACE ::Eigen3)
-endif()
+include_directories(
+        include/cppoptlib
+        include/cpppoptlib/linesearch
+        include/cppoptlib/solver
+        ${EIGEN3_INCLUDE_DIR}
+)
 
-install(TARGETS cppoptlib EXPORT cppoptlib-targets)
+set(HEADER_FILES
+        include/cppoptlib/boundedproblem.h
+        include/cppoptlib/meta.h
+        include/cppoptlib/problem.h
+        include/cppoptlib/timer.h
+        include/cppoptlib/linesearch/armijo.h
+        include/cppoptlib/linesearch/morethuente.h
+        include/cppoptlib/linesearch/wolfeheuristic.h
+        include/cppoptlib/solver/bfgssolver.h
+        include/cppoptlib/solver/lbfgssolver.h
+        include/cppoptlib/solver/lbfgsbsolver.h
+        include/cppoptlib/solver/cmaesbsolver.h
+        include/cppoptlib/solver/cmaesbsolver.h
+        include/cppoptlib/solver/cmaessolver.h
+        include/cppoptlib/solver/conjugatedgradientdescentsolver.h
+        include/cppoptlib/solver/gradientdescentsolver.h
+        include/cppoptlib/solver/isolver.h
+        include/cppoptlib/solver/neldermeadsolver.h
+        include/cppoptlib/solver/newtondescentsolver.h
+        )
 
-if(TARGET ::Eigen3)
-    install(EXPORT cppoptlib-targets DESTINATION lib/cmake/cppoptlib
-        NAMESPACE ::) # export name will be '::cppoptlib'
-    # write and install config module
-    file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/hide/cppoptlib-config.cmake "
-        include(CMakeFindDependencyMacro)
-        find_dependency(Eigen3)
-        if(Eigen3_FOUND)
-            include(\"\${CMAKE_CURRENT_LIST_DIR}/cppoptlib-targets.cmake\")
-        endif()
-    ")
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/hide/cppoptlib-config.cmake
-        DESTINATION lib/cmake/cppoptlib)
-else()
-    # config-module without referencing Eigen
-    install(EXPORT cppoptlib-targets DESTINATION lib/cmake/cppoptlib
-        NAMESPACE :: # export name will be '::cppoptlib'
-        FILE cppoptlib-config.cmake)
-endif()
+add_library(${PROJECT_NAME} STATIC ${HEADER_FILES})
 
-install(DIRECTORY include/cppoptlib DESTINATION include)
+target_include_directories(${PROJECT_NAME} PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        )
+set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 
-if(BUILD_EXAMPLES)
-    add_subdirectory(src/examples)
-endif()
-
-if(BUILD_TESTING)
-    add_subdirectory(src/test)
-endif()
-
-add_custom_target(lint COMMAND ${CMAKE_COMMAND} -P ${PROJECT_SOURCE_DIR}/cmake/lint.cmake)
+add_library(Externals::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
