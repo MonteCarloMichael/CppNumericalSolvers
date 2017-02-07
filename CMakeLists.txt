@@ -41,6 +41,7 @@ set(HEADER_FILES
         include/cppoptlib/solver/isolver.h
         include/cppoptlib/solver/neldermeadsolver.h
         include/cppoptlib/solver/newtondescentsolver.h
+        include/cppoptlib/solver/newtonraphsonsolver.h
         )
 
 set(SOURCE_FILES
@@ -55,3 +56,5 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 #set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 
 add_library(Externals::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
+
+add_subdirectory(include/cppoptlib/tests)
