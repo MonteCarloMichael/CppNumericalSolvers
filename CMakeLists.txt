@@ -42,6 +42,7 @@ set(HEADER_FILES
         include/cppoptlib/solver/neldermeadsolver.h
         include/cppoptlib/solver/newtondescentsolver.h
         include/cppoptlib/solver/newtonraphsonsolver.h
+        include/cppoptlib/linesearch/smallestvectorinconvexhullfinder.h
         )
 
 set(SOURCE_FILES
