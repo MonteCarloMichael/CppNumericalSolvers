@@ -12,34 +12,63 @@
 
 namespace cppoptlib {
 
-  template<typename Scalar_, int Dim_ = Eigen::Dynamic, int SetSize_ = Eigen::Dynamic>
+  template<typename Scalar_, long int Dim_ = Eigen::Dynamic, long int SetSize_ = Eigen::Dynamic>
   class SmallestVectorInConvexHullFinder {
   public:
-    static const int Dim = Dim_;
-    static const int SetSize = SetSize_;
+    static const long int Dim = Dim_;
+    static const long int SetSize = SetSize_;
     typedef Scalar_ Scalar;
     using TVector   = Eigen::Matrix<Scalar, Dim, 1>;
     using TSetVector = Eigen::Matrix<Scalar, SetSize, 1>;
     using TSetMatrix  = Eigen::Matrix<Scalar, SetSize, Dim>;
     using TSquareMatrix  = Eigen::Matrix<Scalar, Dim, Dim>;
-    using TVectorPlusOne = Eigen::Matrix<Scalar,Dim +1,1>;
-    using TFlattenedSquareMatrix = Eigen::Matrix<Scalar, Dim*Dim,1>;
-    //SmallestVectorInConvexHullSetProblem() {};
+    using TVectorPlusOne = Eigen::Matrix<Scalar, Dim, 1>;
+    using TFlattenedSquareMatrix = Eigen::Matrix<Scalar, Dim*Dim, 1>;
+
+    //SmallestVectorInConvexHullSetProblem(Eigen::Matrix<Scalar,Eigen::Dynamic,Eigen::Dynamic> &G) {};
+
+    void resizeFinder(const long int newDim, const long int newSetSize){
+      // resize TVectors members
+      r1.resize(newDim,1);
+      r3.resize(newDim,1);
+      r4.resize(newDim,1);
+      r7.resize(newDim,1);
+      zdx.resize(newDim,1);
+      KT.resize(newDim,1);
+      dx.resize(newDim,1);
+      dz.resize(newDim,1);
+      e.resize(newDim,1);
+      x.resize(newDim,1);
+      z.resize(newDim,1);
+
+      //resize TVectorPlusOne
+      tempVec.resize(newDim+1,1);
+
+      //resize TSetVector members
+      d.resize(newSetSize,1);
+
+      //resize TSquareMatrix members
+      C.resize(newDim,newDim);
+      Q.resize(newDim,newDim);
+      QD.resize(newDim,newDim);
+
+      //Eigen::JacobiSVD<TSquareMatrix> svd;
+      //Eigen::LLT<TSquareMatrix,Eigen::UpLoType::Upper> llt;
+    };
 
     TVector findSmallestVectorInConvexHull(const TSetMatrix &G) {
-    //TODO REPLACE LLT SOLVE BECAUSE MATRICES ARE NOT GURANTEED TO BE POSITIVE DEFINIT
+    //TODO REPLACE LLT SOLVE BECAUSE MATRICES ARE NOT GUARANTEED TO BE POSITIVE DEFINIT
       // x: primal variables
       // y: dual lagrange mutlipliers
       // z: dual slack variables
 
-      e = Eigen::Matrix<Scalar,Dim,1>::Constant(1.0);
+      e.setOnes(G.cols(),1);
       x = e;
 
       z = x; // initialize
       y = static_cast<Scalar>(0.0);
 
       const Scalar mu0 = x.dot(z) / static_cast<Scalar>(Dim);
-      // nicht x.transpose()*x = 1
       const Scalar muTolerance = 1e-5;
       const Scalar residualNormTolerance = 1e-5;
 
@@ -56,18 +85,16 @@ namespace cppoptlib {
       const Scalar muStoppingConstant = muTolerance * mu0;
       const Scalar residualStoppingConstant = residualNormTolerance * infinityNormedQ;
 
-      TVectorPlusOne tempVec;
-
 
       int maxit = 100;
       int k;
       for (k=0; k < maxit; ++k) {
 
-        r1 = -Q * x + e * y + z;
+        r1 = -Q*x + e * y + z;
         r2 = -1 + x.sum();
         r3 = -x.array() * z.array();
 
-        tempVec.head(Dim) = r1.head(Dim);
+        tempVec.head(x.rows()) = r1.head(x.rows());
         tempVec.tail(1)(0) = r2;
 
         // infinity norm for a vector because below does not work:
@@ -128,8 +155,6 @@ namespace cppoptlib {
         x = x + (dx * (stepSizeDamping * ap));
         y = y + dy * ad * stepSizeDamping;
         z = z + (dz * (stepSizeDamping * ad));
-       //TODO rs never gets smaller than residualstoppingconstant, ES GEHT FÜR k=2 schief, in k=1 wird etwas falsch
-        // gesettet!!
       };
 
       if (k == maxit) std::cout << "max it reached" << std::endl;
@@ -186,6 +211,8 @@ namespace cppoptlib {
       y, q;
     TVector r1, r3, r4, r7, zdx, KT, dx,  dz,\
       e,x,z;
+
+    TVectorPlusOne tempVec;
 
     TSetVector d;
 

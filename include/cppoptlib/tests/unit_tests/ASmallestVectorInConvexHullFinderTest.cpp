@@ -11,16 +11,13 @@ using namespace testing;
 
 class ASmallestVectorInConvexHullFinderTest : public Test {};
 
-TEST_F(ASmallestVectorInConvexHullFinderTest , Minimum) {
+TEST_F(ASmallestVectorInConvexHullFinderTest , Example1) {
 
   static const int Dim = 2;
   static const int SetSize = 4;
   typedef double Scalar;
   using TVector   = Eigen::Matrix<Scalar, Dim, 1>;
-  //using TSetVector = Eigen::Matrix<Scalar, SetSize, 1>;
   using TSetMatrix  = Eigen::Matrix<Scalar, SetSize, Dim>;
-  //using TSquareMatrix  = Eigen::Matrix<Scalar, Dim, Dim>;
-
 
   TSetMatrix G;
   G(0,0) = +1.0; G(0,1) = +0.0;
@@ -35,7 +32,6 @@ TEST_F(ASmallestVectorInConvexHullFinderTest , Minimum) {
   Eigen::Vector2d referenceVector;
   referenceVector << 0.5,0.5;
 
-  //ASSERT_TRUE(true);
   ASSERT_TRUE(resultVector.isApprox(referenceVector));
 }
 

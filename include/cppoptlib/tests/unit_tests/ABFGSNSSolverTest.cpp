@@ -3,23 +3,23 @@
 //
 
 #include <gmock/gmock.h>
-#include "lbfgssolver.h"
+#include "bfgsnssolver.h"
 #include "TestProblems.h"
 
 using namespace testing;
 
-class ALBFGSSolverTest : public Test {};
+class ABfgsNsSolverTest : public Test {};
 
 
 
-TEST_F(ALBFGSSolverTest, Minimum) {
+TEST_F(ABfgsNsSolverTest, Minimum) {
   Eigen::VectorXd  x(2);
   x << 1.0, 1.0;
   MinimumProblem f;
 
   cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::defaults();
   crit.iterations = 100;
-  cppoptlib::LbfgsSolver<MinimumProblem> solver;
+  cppoptlib::BfgsNsSolver<MinimumProblem> solver;
   solver.setDebug(cppoptlib::DebugLevel::High);
   solver.setStopCriteria(crit);
   solver.minimize(f, x);
@@ -29,14 +29,14 @@ TEST_F(ALBFGSSolverTest, Minimum) {
   ASSERT_TRUE(x.isApprox(xref));
 }
 
-TEST_F(ALBFGSSolverTest, Cusp) {
+TEST_F(ABfgsNsSolverTest, Cusp) {
   Eigen::VectorXd  x(1);
-  x << 1.0;
+  x << 3.0;
   CuspProblem f;
 
   cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::defaults();
   crit.iterations = 100;
-  cppoptlib::LbfgsSolver<CuspProblem> solver;
+  cppoptlib::BfgsNsSolver<CuspProblem> solver;
   solver.setDebug(cppoptlib::DebugLevel::High);
   solver.setStopCriteria(crit);
   solver.minimize(f, x);
@@ -46,5 +46,8 @@ TEST_F(ALBFGSSolverTest, Cusp) {
 
   Eigen::VectorXd xref(1);
   xref << 0.0;
-  ASSERT_TRUE(x.isApprox(xref));
+  std::cout << x << std::endl;
+  //ASSERT_TRUE(x.isApprox(xref,0.1));
+  ASSERT_TRUE( (x-xref).norm() < 0.001);
+
 }

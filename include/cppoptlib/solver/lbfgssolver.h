@@ -31,6 +31,7 @@ class LbfgsSolver : public ISolver<ProblemType, 1> {
 
         size_t iter = 0, globIter = 0;
         Scalar H0k = 1;
+        objFunc.callback(this->m_current, x0);
         this->m_current.reset();
         do {
             const Scalar relativeEpsilon = static_cast<Scalar>(0.0001) * std::max(static_cast<Scalar>(1.0), x0.norm());

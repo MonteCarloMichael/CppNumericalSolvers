@@ -28,17 +28,18 @@ namespace cppoptlib {
       const Scalar c1 = 1e-4;
       const Scalar c2 = 0.5; //value from hanso //value suggested in Numerical Optimiziation book = 0.9;
       Scalar a = 0;
-      Scalar b = std::numeric_limits::infinity();
+      Scalar b = std::numeric_limits<Scalar >::infinity();
       Scalar alpha = alpha_init; // important to try steplength one first
 
       // calculate initial values
       const Scalar f_init = objFunc.value(x);
+      Scalar f = f_init;
 
       TVector grad(x.rows());
       objFunc.gradient(x, grad);
 
       const Scalar searchDirectionProjectedOnGradient_init = grad.dot(searchDir);
-      assert(searchDirectionProjectedOnGradient_init >= 0 && "The search direction is not a descent direction.");
+      //assert(searchDirectionProjectedOnGradient_init >= 0 && "The search direction is not a descent direction.");
 
       const Scalar sc1 = c1 * searchDirectionProjectedOnGradient_init;
       const Scalar sc2 = c2 * searchDirectionProjectedOnGradient_init;
@@ -46,26 +47,31 @@ namespace cppoptlib {
       // set parameters
       const Scalar searchDirNorm = searchDir.norm();
 
-      const Scalar nbisectmax = std::max(30, std::round(std::log2(1e5 * searchDirNorm))); //more iterations if ||d|| big
-      const Scalar nexpandmax = std::max(10,
-                                         std::round(std::log2(1e5 / searchDirNorm))); //more iterations if ||d|| small
+      /*const Scalar nbisectmax = std::max(30, std::round(std::log2(1e5 * searchDirNorm))); //more iterations if ||d||
+      // big
+      const Scalar nexpandmax = std::max(10, std::round(std::log2(1e5 / searchDirNorm))); //more iterations if ||d|| small
       Scalar nbisect = 0;
-      Scalar nexpand = 0;
+      Scalar nexpand = 0;*/
 
       //bool done = false;
 
+
       while (true) {
+
+        f = objFunc.value(x + alpha*searchDir);
+        objFunc.gradient(x + alpha*searchDir , grad);
+
         // evaluate armijo condition (if not <=)
-        if (objFunc.value(x + alpha * searchDir) > f_init + alpha * sc1) b = alpha;
+        if ( f > f_init + alpha * sc1) b = alpha;
           // evaluate weak Wolfe condition (if not >=)
-        else if (objFunc.gradient(x + alpha * searchDir, grad).dot(searchDir) < sc2) a = alpha;
+        else if ( grad.dot(searchDir) < sc2) a = alpha;
         else {
           return alpha;
         }
 
         // calculate new alpha
-        if (b < std::numeric_limits::infinity()) alpha = 0.5 * (a + b);
-        else alpha = 2.0 * a;
+      if (b < std::numeric_limits<Scalar>::infinity()) alpha = static_cast<Scalar>(0.5) * (a + b);
+        else alpha = static_cast<Scalar>(2.0) * a;
 
         /*// calculate new alpha with stop criteria to prevent infinte bracketing
         // calculate new alpha
