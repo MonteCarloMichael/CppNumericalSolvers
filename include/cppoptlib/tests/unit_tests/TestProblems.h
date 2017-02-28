@@ -78,4 +78,17 @@ public:
   }*/
 };
 
+class CuspProblem2D : public cppoptlib::Problem<double,Eigen::Dynamic> {
+public:
+  double value(const Eigen::VectorXd &x) {
+    return -exp(-abs(x(0))) + x(1)*x(1);
+  }
+
+  void gradient(const Eigen::VectorXd &x, Eigen::VectorXd &grad) {
+    if(x(0)>=0) grad(0) = +exp(-abs(x(0)));
+    else        grad(0) = -exp(-abs(x(0)));
+    grad(1) = 2*x(1);
+  }
+};
+
 #endif //TESTPROBLEMS_H
