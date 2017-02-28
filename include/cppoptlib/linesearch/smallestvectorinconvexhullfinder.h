@@ -56,6 +56,8 @@ namespace cppoptlib {
       //Eigen::LLT<TSquareMatrix,Eigen::UpLoType::Upper> llt;
     };
 
+    /* Computing shortest l2-norm vector in convex hull of cached gradients:
+     */
     TVector findSmallestVectorInConvexHull(const TSetMatrix &G) {
     //TODO REPLACE LLT SOLVE BECAUSE MATRICES ARE NOT GUARANTEED TO BE POSITIVE DEFINIT
       // x: primal variables
@@ -82,7 +84,7 @@ namespace cppoptlib {
       const Scalar infinityNormedQ = Q.cwiseAbs().rowwise().sum().maxCoeff() + static_cast<Scalar>(2.0);
 
 
-      const Scalar muStoppingConstant = muTolerance * mu0;
+      const Scalar muStoppingConstant = abs(muTolerance * mu0);
       const Scalar residualStoppingConstant = residualNormTolerance * infinityNormedQ;
 
 
@@ -158,6 +160,7 @@ namespace cppoptlib {
       };
 
       if (k == maxit) std::cout << "max it reached" << std::endl;
+      else std::cout << "optimal convex hull vector found after " << k << " iterations"  << std::endl;
 
       replaceNegativeElementsByZero(x);// Project x onto R+
 
