@@ -111,11 +111,15 @@ namespace cppoptlib {
             gradientSetSelection = gradientSet.block( k-J+1, 0, J, DIM); // J elements
           }
         }
-        /*TODO Problem: during compile-time the size of gradientSetSelection is not known*/
 
-        finder.resizeFinder(DIM,gradientSetSelection.rows());
-        TVector dk = finder.findSmallestVectorInConvexHull(gradientSetSelection);
-
+        TVector dk;
+        std::cout << j(k) << std::endl;
+        if( j(k) > 1 ) {
+          finder.resizeFinder(DIM, gradientSetSelection.rows());
+          dk = finder.findSmallestVectorInConvexHull(gradientSetSelection);
+        } else{
+          dk = grad;
+        }
 
 
         // ---------- MY PART END --------//TODO
@@ -123,6 +127,7 @@ namespace cppoptlib {
         x_old = x0;
 
         ++this->m_current.iterations;
+        std::cout << dk.norm() << std::endl;
         this->m_current.gradNorm = dk.norm();//grad.template lpNorm<Eigen::Infinity>();
         this->m_status = checkConvergence(this->m_stop, this->m_current);
       } while (objFunc.callback(this->m_current, x0) && (this->m_status == Status::Continue));
