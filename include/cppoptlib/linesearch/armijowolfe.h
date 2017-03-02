@@ -25,6 +25,9 @@ namespace cppoptlib {
                              const TVector &searchDir,
                              ProblemType &objFunc,
                              const Scalar alpha_init = 1.0) {
+
+      assert(searchDir.norm() != 0);
+
       const Scalar c1 = 1e-4;
       const Scalar c2 = 0.5; //value from hanso //value suggested in Numerical Optimiziation book = 0.9;
       Scalar a = 0;

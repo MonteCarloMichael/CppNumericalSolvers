@@ -81,3 +81,26 @@ TEST_F(ABfgsNsSolverTest, Cusp2D) {
   ASSERT_TRUE( (x-xref).norm() < 0.001);
 
 }
+
+TEST_F(ABfgsNsSolverTest, Cusp3D) {
+  Eigen::VectorXd  x(3);
+  x << 3.0,3.0,3.0;
+  CuspProblem3D f;
+
+  cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::defaults();
+  crit.iterations = 100;
+  cppoptlib::BfgsNsSolver<CuspProblem3D> solver;
+  solver.setDebug(cppoptlib::DebugLevel::High);
+  solver.setStopCriteria(crit);
+  solver.minimize(f, x);
+  std::cout << "f in argmin " << f(x) << std::endl;
+  std::cout << "Solver status: " << solver.status() << std::endl;
+  std::cout << "Final criteria values: " << std::endl << solver.criteria() << std::endl;
+
+  Eigen::VectorXd xref(3);
+  xref << 0.0,0.0,0.0;
+  std::cout << x << std::endl;
+  //ASSERT_TRUE(x.isApprox(xref,0.1));
+  ASSERT_TRUE( (x-xref).norm() < 0.001);
+
+}

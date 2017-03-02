@@ -25,7 +25,7 @@ namespace cppoptlib {
       const size_t DIM = x0.rows();
       const size_t MaxIt = Superclass::m_stop.iterations+1;
 
-      SmallestVectorInConvexHullFinder<Scalar>finder; // TODO add max values with MaxIt
+
 
 
       THessian H = THessian::Identity(DIM, DIM);
@@ -49,12 +49,13 @@ namespace cppoptlib {
       this->m_current.reset();
       do {
         k = this->m_current.iterations;
+        std::cout << "k = " << k << std::endl;
 
         TVector searchDir = -1 * H * grad;
         // check "positive definite"
         Scalar phi = grad.dot(searchDir);
 
-        // positive definit ?
+        // Check if search direction is a descent direction (positive definit)
         if (phi > 0) {
           // no, we reset the hessian approximation
           H = THessian::Identity(DIM, DIM);
@@ -111,14 +112,16 @@ namespace cppoptlib {
             gradientSetSelection = gradientSet.block( k-J+1, 0, J, DIM); // J elements
           }
         }
-
-        TVector dk;
-        std::cout << j(k) << std::endl;
+        std::cout << "G = " << std::setprecision(9) << gradientSetSelection.transpose() << std::endl;
+        Scalar dknorm;
+        std::cout << "j(k) = " << j(k) << std::endl;
         if( j(k) > 1 ) {
+          SmallestVectorInConvexHullFinder<Scalar>finder; // TODO add max values with MaxIt
           finder.resizeFinder(DIM, gradientSetSelection.rows());
-          dk = finder.findSmallestVectorInConvexHull(gradientSetSelection);
+          dknorm = finder.findSmallestVectorInConvexHull(gradientSetSelection).second.norm();
+
         } else{
-          dk = grad;
+          dknorm = grad.norm();
         }
 
 
@@ -127,8 +130,8 @@ namespace cppoptlib {
         x_old = x0;
 
         ++this->m_current.iterations;
-        std::cout << dk.norm() << std::endl;
-        this->m_current.gradNorm = dk.norm();//grad.template lpNorm<Eigen::Infinity>();
+        std::cout << "dk norm: " <<  dknorm << std::endl;
+        this->m_current.gradNorm = dknorm; //grad.template lpNorm<Eigen::Infinity>();
         this->m_status = checkConvergence(this->m_stop, this->m_current);
       } while (objFunc.callback(this->m_current, x0) && (this->m_status == Status::Continue));
     }

@@ -12,6 +12,7 @@
 
 namespace cppoptlib {
 
+
   template<typename Scalar_, long int Dim_ = Eigen::Dynamic, long int SetSize_ = Eigen::Dynamic>
   class SmallestVectorInConvexHullFinder {
   public:
@@ -26,6 +27,14 @@ namespace cppoptlib {
     using TFlattenedSquareMatrix = Eigen::Matrix<Scalar, Dim*Dim, 1>;
 
     //SmallestVectorInConvexHullSetProblem(Eigen::Matrix<Scalar,Eigen::Dynamic,Eigen::Dynamic> &G) {};
+
+    /*struct QPResults{
+      QPResults(const TVector &x1, const TVector &d1){
+        x = x1;
+        d = d1;
+      }
+      TVector x, d;
+    };*/
 
     void resizeFinder(const long int newDim, const long int newSetSize){
       // resize TVectors members
@@ -58,7 +67,8 @@ namespace cppoptlib {
 
     /* Computing shortest l2-norm vector in convex hull of cached gradients:
      */
-    TVector findSmallestVectorInConvexHull(const TSetMatrix &G) {
+    std::pair<TVector,TSetVector> findSmallestVectorInConvexHull(const TSetMatrix &G) {
+    //TVector findSmallestVectorInConvexHull(const TSetMatrix &G) {
     //TODO REPLACE LLT SOLVE BECAUSE MATRICES ARE NOT GUARANTEED TO BE POSITIVE DEFINIT
       // x: primal variables
       // y: dual lagrange mutlipliers
@@ -153,7 +163,7 @@ namespace cppoptlib {
         // dual step size
         p = -z.array() / dz.array();
         ad = calculateStepSize(p);
-
+        std::cout << "x = " << x.transpose() << std::endl;
         x = x + (dx * (stepSizeDamping * ap));
         y = y + dy * ad * stepSizeDamping;
         z = z + (dz * (stepSizeDamping * ad));
@@ -168,9 +178,12 @@ namespace cppoptlib {
 
       //set other output variables using best found x
       d = G * x;
-      q = d.dot(d);
+      //q = d.norm();//d.dot(d); // TODO NEEDED?
 
-      return x;
+      //return x;
+      std::cout << "x = "<< x << std::endl;
+      std::cout << "d = "<< d.transpose() << std::endl;
+      return std::make_pair(x,d);
     };
 
     Scalar calculateStepSize(const TVector &x) {
@@ -220,7 +233,7 @@ namespace cppoptlib {
     TSetVector d;
 
     TSquareMatrix C, Q, QD;
-    Eigen::JacobiSVD<TSquareMatrix> svd;
+    //Eigen::JacobiSVD<TSquareMatrix> svd;
     Eigen::LLT<TSquareMatrix,Eigen::UpLoType::Upper> llt;
     //Eigen::HouseholderQR<TSquareMatrix> hhQR = Eigen::HouseholderQR;
   };
