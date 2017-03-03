@@ -16,46 +16,23 @@ TEST_F(ASmallestVectorInConvexHullFinderTest , Example1) {
   static const int Dim = 2;
   static const int SetSize = 4;
   typedef double Scalar;
-  using TVector   = Eigen::Matrix<Scalar, Dim, 1>;
-  using TSetMatrix  = Eigen::Matrix<Scalar, SetSize, Dim>;
+  using TSetVector   = Eigen::Matrix<Scalar, SetSize, 1>;
+  using TSetMatrix  = Eigen::Matrix<Scalar, Dim, SetSize>;
 
   TSetMatrix G;
-  G(0,0) = +1.0; G(0,1) = +0.0;
-  G(1,0) = +0.0; G(1,1) = +1.0;
-  G(2,0) = -2.0; G(2,1) = +0.0;
-  G(3,0) = +0.0; G(3,1) = -2.0;
+  G(0,0) = +1.0; G(1,0) = +0.0;
+  G(0,1) = +0.0; G(1,1) = +1.0;
+  G(0,2) = -2.0; G(1,2) = +0.0;
+  G(0,3) = +0.0; G(1,3) = -2.0;
 
   cppoptlib::SmallestVectorInConvexHullFinder<Scalar, Dim, SetSize> finder;
 
-  TVector resultVector = finder.findSmallestVectorInConvexHull(G).first;
+  TSetVector resultVector = finder.findSmallestVectorInConvexHull(G).first;
 
-  Eigen::Vector2d referenceVector;
-  referenceVector << 0.5,0.5;
+  Eigen::Vector4d referenceVector;
+  referenceVector << 1.0,2.0,3.0,4.0;
 
   ASSERT_TRUE(resultVector.isApprox(referenceVector));
 }
 
-TEST_F(ASmallestVectorInConvexHullFinderTest , Example2) {
-
-  static const int Dim = 2;
-  static const int SetSize = 4;
-  typedef double Scalar;
-  using TVector   = Eigen::Matrix<Scalar, Dim, 1>;
-  using TSetMatrix  = Eigen::Matrix<Scalar, SetSize, Dim>;
-
-  TSetMatrix G;
-  G(0,0) = +1.0; G(0,1) = +0.0;
-  G(1,0) = +0.0; G(1,1) = +1.0;
-  G(2,0) = -2.0; G(2,1) = +0.0;
-  G(3,0) = +1.0; G(3,1) = +1.0;
-
-  cppoptlib::SmallestVectorInConvexHullFinder<Scalar, Dim, SetSize> finder;
-
-  TVector resultVector = finder.findSmallestVectorInConvexHull(G).first;
-
-  Eigen::Vector2d referenceVector;
-  referenceVector << 1.0/6.0,5.0/6.0;
-
-  ASSERT_TRUE(resultVector.isApprox(referenceVector,0.00001));
-}
 

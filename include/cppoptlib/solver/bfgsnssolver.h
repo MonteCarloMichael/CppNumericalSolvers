@@ -25,15 +25,12 @@ namespace cppoptlib {
       const size_t DIM = x0.rows();
       const size_t MaxIt = Superclass::m_stop.iterations+1;
 
-
-
-
       THessian H = THessian::Identity(DIM, DIM);
       TVector grad(DIM);
       objFunc.gradient(x0, grad);
 
-      MatrixType gradientSet = MatrixType::Zero(MaxIt,DIM); // TODO better define size?
-      gradientSet.row(0) = grad;
+      MatrixType gradientSet = MatrixType::Zero(DIM,MaxIt); // TODO better define size?
+      gradientSet.col(0) = grad;
 
       TVector x_old = x0;
 
@@ -42,14 +39,12 @@ namespace cppoptlib {
       Eigen::Matrix<Scalar, Eigen::Dynamic, 1> j(MaxIt,1);
 
       const Scalar xTolerance = 1e-4;
-      //const Scalar dTolerance = 1e-4;
 
       int k;
 
       this->m_current.reset();
       do {
         k = this->m_current.iterations;
-        std::cout << "k = " << k << std::endl;
 
         TVector searchDir = -1 * H * grad;
         // check "positive definite"
@@ -69,7 +64,7 @@ namespace cppoptlib {
 
         TVector grad_old = grad;
         objFunc.gradient(x0, grad);
-        gradientSet.row(k) = grad;
+        gradientSet.col(k) = grad;
 
         TVector y = grad - grad_old;
 
@@ -78,60 +73,44 @@ namespace cppoptlib {
         const Scalar rho = 1.0 / y.dot(s);
         H = H - rho * (s * (y.transpose() * H) + (H * y) * s.transpose())
             + rho * rho * (y.dot(H * y) + 1.0 / rho) * (s * s.transpose());
-        // std::cout << "iter: "<<iter<< " f = " <<  objFunc.value(x0) << " ||g||_inf "<<gradNorm   << std::endl;
 
-
-        // original BFGS stopping condition
-        //if( (x_old-x0).template lpNorm<Eigen::Infinity>() < 1e-7  ) break;
-
-        // ---------- MY PART --------//TODO
-        // stopping condition for non-smooth optimization
         j(0) = 1;
-
-        Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic,0,J> gradientSetSelection; //TODO CHECK J+1?
-
-        // TODO make a matrix and then resize it
+        Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> gradientSetSelection; //TODO CHECK J+1?
+        //TODO make a matrix and then resize it
 
         if ( (x0 - x_old).norm() > xTolerance ){
           j(k) = 1;
-          gradientSetSelection.resize(1,DIM);//gradientSetSelection = Eigen::Matrix<Scalar, 1, Eigen::Dynamic>::Zero(1,DIM);
-          gradientSetSelection.row(0) = grad;
+          gradientSetSelection.resize(DIM,1);
+          gradientSetSelection.col(0) = grad;
         }
         else {
           assert( j(k-1) <= J );
           // check second last element
           if ( j(k-1) < J ) {
-
             j(k) = j(k-1) + 1;
-            gradientSetSelection.resize(j(k),DIM);
-            gradientSetSelection = gradientSet.block(k-j(k)+1,0,j(k),DIM);// jk elements //k - ( k-j(k)+1 ) +1
+            gradientSetSelection.resize(DIM,j(k));
+            gradientSetSelection = gradientSet.block(0,k-j(k)+1,DIM,j(k));// jk elements //k - ( k-j(k)+1 ) +1
+
           }
           else { // j(k-1) == J)
             j(k) = J;
-            gradientSetSelection.resize(J,DIM);
-            gradientSetSelection = gradientSet.block( k-J+1, 0, J, DIM); // J elements
+            gradientSetSelection.resize(DIM,J);
+            gradientSetSelection = gradientSet.block(0,k-J+1,DIM,J); // J elements
           }
         }
-        std::cout << "G = " << std::setprecision(9) << gradientSetSelection.transpose() << std::endl;
         Scalar dknorm;
-        std::cout << "j(k) = " << j(k) << std::endl;
         if( j(k) > 1 ) {
           SmallestVectorInConvexHullFinder<Scalar>finder; // TODO add max values with MaxIt
           finder.resizeFinder(DIM, gradientSetSelection.rows());
           dknorm = finder.findSmallestVectorInConvexHull(gradientSetSelection).second.norm();
-
         } else{
           dknorm = grad.norm();
         }
 
-
-        // ---------- MY PART END --------//TODO
-
         x_old = x0;
 
         ++this->m_current.iterations;
-        std::cout << "dk norm: " <<  dknorm << std::endl;
-        this->m_current.gradNorm = dknorm; //grad.template lpNorm<Eigen::Infinity>();
+        this->m_current.gradNorm = dknorm;
         this->m_status = checkConvergence(this->m_stop, this->m_current);
       } while (objFunc.callback(this->m_current, x0) && (this->m_status == Status::Continue));
     }

@@ -21,55 +21,43 @@ namespace cppoptlib {
     typedef Scalar_ Scalar;
     using TVector   = Eigen::Matrix<Scalar, Dim, 1>;
     using TSetVector = Eigen::Matrix<Scalar, SetSize, 1>;
-    using TSetMatrix  = Eigen::Matrix<Scalar, SetSize, Dim>;
-    using TSquareMatrix  = Eigen::Matrix<Scalar, Dim, Dim>;
-    using TVectorPlusOne = Eigen::Matrix<Scalar, Dim, 1>;
-    using TFlattenedSquareMatrix = Eigen::Matrix<Scalar, Dim*Dim, 1>;
-
-    //SmallestVectorInConvexHullSetProblem(Eigen::Matrix<Scalar,Eigen::Dynamic,Eigen::Dynamic> &G) {};
-
-    /*struct QPResults{
-      QPResults(const TVector &x1, const TVector &d1){
-        x = x1;
-        d = d1;
-      }
-      TVector x, d;
-    };*/
+    using TSetMatrix  = Eigen::Matrix<Scalar, Dim, SetSize>;
+    using TSquareSetMatrix  = Eigen::Matrix<Scalar, SetSize, SetSize>;
+    using TVectorPlusOne = Eigen::Matrix<Scalar, SetSize, 1>;
+    using TFlattenedSquareMatrix = Eigen::Matrix<Scalar, SetSize*SetSize, 1>;
 
     void resizeFinder(const long int newDim, const long int newSetSize){
       // resize TVectors members
-      r1.resize(newDim,1);
-      r3.resize(newDim,1);
-      r4.resize(newDim,1);
-      r7.resize(newDim,1);
-      zdx.resize(newDim,1);
-      KT.resize(newDim,1);
-      dx.resize(newDim,1);
-      dz.resize(newDim,1);
-      e.resize(newDim,1);
-      x.resize(newDim,1);
-      z.resize(newDim,1);
+      r1.resize(newSetSize,1);
+      r3.resize(newSetSize,1);
+      r4.resize(newSetSize,1);
+      r7.resize(newSetSize,1);
+      zdx.resize(newSetSize,1);
+      KT.resize(newSetSize,1);
+      dx.resize(newSetSize,1);
+      dz.resize(newSetSize,1);
+      e.resize(newSetSize,1);
+      x.resize(newSetSize,1);
+      z.resize(newSetSize,1);
 
       //resize TVectorPlusOne
-      tempVec.resize(newDim+1,1);
+      tempVec.resize(newSetSize+1,1);
 
       //resize TSetVector members
-      d.resize(newSetSize,1);
+      d.resize(newDim,1);
 
       //resize TSquareMatrix members
-      C.resize(newDim,newDim);
-      Q.resize(newDim,newDim);
-      QD.resize(newDim,newDim);
+      C.resize(newSetSize,newSetSize);
+      Q.resize(newSetSize,newSetSize);
+      QD.resize(newSetSize,newSetSize);
 
-      //Eigen::JacobiSVD<TSquareMatrix> svd;
+     //Eigen::JacobiSVD<TSquareMatrix> svd;
       //Eigen::LLT<TSquareMatrix,Eigen::UpLoType::Upper> llt;
     };
 
     /* Computing shortest l2-norm vector in convex hull of cached gradients:
      */
-    std::pair<TVector,TSetVector> findSmallestVectorInConvexHull(const TSetMatrix &G) {
-    //TVector findSmallestVectorInConvexHull(const TSetMatrix &G) {
-    //TODO REPLACE LLT SOLVE BECAUSE MATRICES ARE NOT GUARANTEED TO BE POSITIVE DEFINIT
+    std::pair<TSetVector,TVector> findSmallestVectorInConvexHull(const TSetMatrix &G) {
       // x: primal variables
       // y: dual lagrange mutlipliers
       // z: dual slack variables
@@ -80,7 +68,8 @@ namespace cppoptlib {
       z = x; // initialize
       y = static_cast<Scalar>(0.0);
 
-      const Scalar mu0 = x.dot(z) / static_cast<Scalar>(Dim);
+      //TODO/const Scalar mu0 = x.transpose().dot(z) / static_cast<Scalar>(SetSize);
+      const Scalar mu0 = 1.0;
       const Scalar muTolerance = 1e-5;
       const Scalar residualNormTolerance = 1e-5;
 
@@ -90,11 +79,10 @@ namespace cppoptlib {
       Scalar stepSizeDamping = 0.9995;
       int deltaSigmaHeuristic = 3;
 
-      //const Scalar infinityNormedQ = Q.lpNorm<Eigen::Infinity>() + static_cast<Scalar>(2.0);
       const Scalar infinityNormedQ = Q.cwiseAbs().rowwise().sum().maxCoeff() + static_cast<Scalar>(2.0);
 
 
-      const Scalar muStoppingConstant = abs(muTolerance * mu0);
+      const Scalar muStoppingConstant = muTolerance * mu0;
       const Scalar residualStoppingConstant = residualNormTolerance * infinityNormedQ;
 
 
@@ -110,10 +98,9 @@ namespace cppoptlib {
         tempVec.tail(1)(0) = r2;
 
         // infinity norm for a vector because below does not work:
-        //rs = tempVec.lpNorm<Eigen::Infinity>();
-        rs = tempVec.cwiseAbs().maxCoeff();
+        rs = tempVec.cwiseAbs().maxCoeff();//rs = tempVec.lpNorm<Eigen::Infinity>();
 
-        mu = -r3.sum() / static_cast<Scalar>(Dim);
+        mu = -(r3.sum()) / static_cast<Scalar>(G.cols());
 
         // Stop condition
         if (rs < residualStoppingConstant) {
@@ -128,28 +115,23 @@ namespace cppoptlib {
         // Do cholesky decomposition
         llt.compute(QD);
         C = llt.matrixU();
+        lu.compute(C.transpose());
+        KT = lu.solve(e);
 
-        //KT = C.transpose().colPivHouseholderQr().solve(e);//KT = C.transpose().inverse() * e;
-        //KT = C.inverse() * e; //TODO CHECK and COMPARE!
-        llt.compute(C);
-        KT = llt.solve(e);
-        //hhQR.compute(C);
-        //KT = hhQR.solve(e);
-
-        M = KT.dot(KT);
+        M = KT.transpose().dot(KT);
 
         // compute the approx tangent direction
         computeTangentDirection();
 
         //Determine maximal step possible in the new direction
         // primal step size
-        TVector p = -x.array() / dx.array();
+        TSetVector p = -x.array() / dx.array();
         ap = calculateStepSize(p);
         // dual step size
         p = -z.array() / dz.array();
         ad = calculateStepSize(p);
 
-        muaff = ((x + dx*ap).dot(z + dz * ad)) / static_cast<Scalar>(Dim);
+        muaff = ((x + dx*ap).dot(z + dz * ad)) / static_cast<Scalar>(G.cols());
         sig = std::pow(muaff / mu, deltaSigmaHeuristic);
         // compute the new corrected search direction taht now includes appropriate amount of centering and mehrotras
         // second order correction term ( see r3 ). We of course reuse the factorization from above
@@ -163,7 +145,6 @@ namespace cppoptlib {
         // dual step size
         p = -z.array() / dz.array();
         ad = calculateStepSize(p);
-        std::cout << "x = " << x.transpose() << std::endl;
         x = x + (dx * (stepSizeDamping * ap));
         y = y + dy * ad * stepSizeDamping;
         z = z + (dz * (stepSizeDamping * ad));
@@ -180,13 +161,10 @@ namespace cppoptlib {
       d = G * x;
       //q = d.norm();//d.dot(d); // TODO NEEDED?
 
-      //return x;
-      std::cout << "x = "<< x << std::endl;
-      std::cout << "d = "<< d.transpose() << std::endl;
       return std::make_pair(x,d);
     };
 
-    Scalar calculateStepSize(const TVector &x) {
+    Scalar calculateStepSize(const TSetVector &x) {
       Scalar min;
       if( x[0] < 0 ) min = std::numeric_limits<Scalar>::max();
       else min = x[0];
@@ -198,7 +176,7 @@ namespace cppoptlib {
       else return min;
     }
 
-    void replaceNegativeElementsByZero(TVector &x) {
+    void replaceNegativeElementsByZero(TSetVector &x) {
       for (int i = 0; i < x.size(); ++i) {
         if (x[i] < 0) x[i] = static_cast<Scalar>(0.0);
       }
@@ -207,35 +185,30 @@ namespace cppoptlib {
     void computeTangentDirection(){
       r4 = r3.array() / x.array();
       r4 += r1;
-      //svd.compute(C.transpose(), Eigen::ComputeThinU | Eigen::ComputeThinV);
-      //r5 = KT.dot(svd.solve(r4));
-      llt.compute(C.transpose());
-      r5 = KT.dot(llt.solve(r4));
+      lu.compute(C.transpose());
+      r5 = KT.dot(lu.solve(r4));
       r6 = r2 + r5;
-      dy = -r6 / M; //CORRECT
+      dy = -r6 / M;
       r7 = r4 + (e * dy).eval();
-      dx = QD.inverse() * r7; // TODO is inverse safe?  //CORRECT
-      //llt.compute(QD);
-      //dx = KT.dot(llt.solve(r7)); // TODO error: no match for 'operator='....
+      dx = QD.inverse() * r7;
 
-      dz = (r3.array() - (z.array()*dx.array()).array() ) / x.array(); //CORRECT
-
+      dz = (r3.array() - (z.array()*dx.array()).array() ) / x.array();
     };
 
   private:
     Scalar r2, rs, mu, muaff, ap, ad, sig, r5, r6, M, dy,\
       y, q;
-    TVector r1, r3, r4, r7, zdx, KT, dx,  dz,\
+    TSetVector r1, r3, r4, r7, zdx, KT, dx,  dz,\
       e,x,z;
 
     TVectorPlusOne tempVec;
 
-    TSetVector d;
+    TVector d;
 
-    TSquareMatrix C, Q, QD;
-    //Eigen::JacobiSVD<TSquareMatrix> svd;
-    Eigen::LLT<TSquareMatrix,Eigen::UpLoType::Upper> llt;
-    //Eigen::HouseholderQR<TSquareMatrix> hhQR = Eigen::HouseholderQR;
+    TSquareSetMatrix C, Q, QD;
+    Eigen::JacobiSVD<TSquareSetMatrix> svd;
+    Eigen::LLT<TSquareSetMatrix,Eigen::UpLoType::Upper> llt;
+    Eigen::FullPivLU<TSquareSetMatrix> lu;
   };
 
 }
