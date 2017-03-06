@@ -6,9 +6,7 @@
 #define AMOLQCGUI_NONSMOOTHTERMINATION_H
 
 #include <Eigen/Cholesky>
-//#include <Eigen/Householder>
 #include <Eigen/LU>
-#include <Eigen/SVD>
 
 namespace cppoptlib {
 
@@ -50,9 +48,6 @@ namespace cppoptlib {
       C.resize(newSetSize,newSetSize);
       Q.resize(newSetSize,newSetSize);
       QD.resize(newSetSize,newSetSize);
-
-     //Eigen::JacobiSVD<TSquareMatrix> svd;
-      //Eigen::LLT<TSquareMatrix,Eigen::UpLoType::Upper> llt;
     };
 
     /* Computing shortest l2-norm vector in convex hull of cached gradients:
@@ -206,7 +201,6 @@ namespace cppoptlib {
     TVector d;
 
     TSquareSetMatrix C, Q, QD;
-    Eigen::JacobiSVD<TSquareSetMatrix> svd;
     Eigen::LLT<TSquareSetMatrix,Eigen::UpLoType::Upper> llt;
     Eigen::FullPivLU<TSquareSetMatrix> lu;
   };
