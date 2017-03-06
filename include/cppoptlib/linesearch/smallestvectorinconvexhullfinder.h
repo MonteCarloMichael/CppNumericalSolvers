@@ -145,8 +145,9 @@ namespace cppoptlib {
         z = z + (dz * (stepSizeDamping * ad));
       };
 
-      if (k == maxit) std::cout << "max it reached" << std::endl;
-      else std::cout << "optimal convex hull vector found after " << k << " iterations"  << std::endl;
+      //TODO - use log from cppoptlib
+      //if (k == maxit) std::cout << "max it reached" << std::endl;
+      //else std::cout << "optimal convex hull vector found after " << k << " iterations"  << std::endl;
 
       replaceNegativeElementsByZero(x);// Project x onto R+
 
