@@ -105,4 +105,30 @@ public:
   }
 };
 
+class NesterovFirst2D : public cppoptlib::Problem<double,Eigen::Dynamic> {
+public:
+  using typename cppoptlib::Problem<double>::Scalar;
+  using typename cppoptlib::Problem<double>::TVector;
+
+  double value(const TVector &x) {
+    return   0.25*(x[0] -1)*(x[0] -1) + abs(x[1] - 2*x[0]*x[0] + 1);
+  }
+};
+
+class Rosenbrock2D : public cppoptlib::Problem<double,Eigen::Dynamic> {
+public:
+  using typename cppoptlib::Problem<double>::Scalar;
+  using typename cppoptlib::Problem<double>::TVector;
+
+  double value(const TVector &x) {
+    const double t1 = (1 - x[0]);
+    const double t2 = (x[1] - x[0] * x[0]);
+    return   t1 * t1 + 100 * t2 * t2;
+  }
+  void gradient(const TVector &x, TVector &grad) {
+    grad[0]  = -2 * (1 - x[0]) + 200 * (x[1] - x[0] * x[0]) * (-2 * x[0]);
+    grad[1]  = 200 * (x[1] - x[0] * x[0]);
+  }
+};
+
 #endif //TESTPROBLEMS_H

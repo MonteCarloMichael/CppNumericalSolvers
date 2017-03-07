@@ -21,7 +21,7 @@ namespace cppoptlib {
     using TSetVector = Eigen::Matrix<Scalar, SetSize, 1>;
     using TSetMatrix  = Eigen::Matrix<Scalar, Dim, SetSize>;
     using TSquareSetMatrix  = Eigen::Matrix<Scalar, SetSize, SetSize>;
-    using TVectorPlusOne = Eigen::Matrix<Scalar, SetSize, 1>;
+    //using TSetVectorPlusOne = Eigen::Matrix<Scalar, SetSize+1, 1>;
     using TFlattenedSquareMatrix = Eigen::Matrix<Scalar, SetSize*SetSize, 1>;
 
     void resizeFinder(const long int newDim, const long int newSetSize){
@@ -39,7 +39,7 @@ namespace cppoptlib {
       z.resize(newSetSize,1);
 
       //resize TVectorPlusOne
-      tempVec.resize(newSetSize+1,1);
+      //tempVec.resize(newSetSize+1,1);
 
       //resize TSetVector members
       d.resize(newDim,1);
@@ -59,6 +59,8 @@ namespace cppoptlib {
 
       e.setOnes(G.cols(),1);
       x = e;
+
+      tempVec.resize(G.cols()+1,1);
 
       z = x; // initialize
       y = static_cast<Scalar>(0.0);
@@ -197,7 +199,7 @@ namespace cppoptlib {
     TSetVector r1, r3, r4, r7, zdx, KT, dx,  dz,\
       e,x,z;
 
-    TVectorPlusOne tempVec;
+    Eigen::Matrix<Scalar, Eigen::Dynamic, 1> tempVec;
 
     TVector d;
 

@@ -3,18 +3,19 @@
 #include <iostream>
 #include <functional>
 #include <list>
-#include "gtest/gtest.h"
-#include "include/cppoptlib/meta.h"
-#include "include/cppoptlib/boundedproblem.h"
-#include "include/cppoptlib/solver/gradientdescentsolver.h"
-#include "include/cppoptlib/solver/conjugatedgradientdescentsolver.h"
-#include "include/cppoptlib/solver/newtondescentsolver.h"
-#include "include/cppoptlib/solver/bfgssolver.h"
-#include "include/cppoptlib/solver/lbfgssolver.h"
-#include "include/cppoptlib/solver/lbfgsbsolver.h"
-#include "include/cppoptlib/solver/cmaessolver.h"
-#include "include/cppoptlib/solver/cmaesbsolver.h"
-#include "include/cppoptlib/solver/neldermeadsolver.h"
+#include <gmock/gmock.h>
+#include "meta.h"
+#include "boundedproblem.h"
+#include "gradientdescentsolver.h"
+#include "conjugatedgradientdescentsolver.h"
+#include "newtondescentsolver.h"
+#include "bfgssolver.h"
+#include "bfgsnssolver.h"
+#include "lbfgssolver.h"
+#include "lbfgsbsolver.h"
+#include "cmaessolver.h"
+#include "cmaesbsolver.h"
+#include "neldermeadsolver.h"
 #define PRECISION 1e-4
 using namespace cppoptlib;
 

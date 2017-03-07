@@ -1,17 +1,18 @@
 #include <iostream>
 #include <functional>
 #include <list>
-#include "../../gtest/googletest/include/gtest/gtest.h"
-#include "../../include/cppoptlib/meta.h"
-#include "../../include/cppoptlib/problem.h"
-#include "../../include/cppoptlib/solver/gradientdescentsolver.h"
-#include "../../include/cppoptlib/solver/conjugatedgradientdescentsolver.h"
-#include "../../include/cppoptlib/solver/newtondescentsolver.h"
-#include "../../include/cppoptlib/solver/bfgssolver.h"
-#include "../../include/cppoptlib/solver/lbfgssolver.h"
-#include "../../include/cppoptlib/solver/lbfgsbsolver.h"
-#include "../../include/cppoptlib/solver/cmaessolver.h"
-#include "../../include/cppoptlib/solver/neldermeadsolver.h"
+#include <gmock/gmock.h>
+#include "meta.h"
+#include "problem.h"
+#include "gradientdescentsolver.h"
+#include "conjugatedgradientdescentsolver.h"
+#include "newtondescentsolver.h"
+#include "bfgssolver.h"
+#include "bfgsnssolver.h"
+#include "lbfgssolver.h"
+#include "lbfgsbsolver.h"
+#include "cmaessolver.h"
+#include "neldermeadsolver.h"
 #define PRECISION 1e-2
 #define PI 3.14159265358979323846
 using namespace cppoptlib;
@@ -192,6 +193,7 @@ CHECKDIFF(Levi,                -4, 3.7 )
 BENCHSOVLER(GradientDescentSolver)
 BENCHSOVLER(ConjugatedGradientDescentSolver)
 BENCHSOVLER(BfgsSolver)
+BENCHSOVLER(BfgsnsSolver)
 BENCHSOVLER(LbfgsSolver)
 BENCHSOVLER(LbfgsbSolver)
 BENCHSOVLER(CMAesSolver)

@@ -4,7 +4,7 @@
 
 #include <gmock/gmock.h>
 #include "newtonraphsonsolver.h"
-#include "TestProblems.h"
+#include "TestProblems.cpp"
 using namespace testing;
 
 class ANewtonRaphsonSolverTest : public Test {};

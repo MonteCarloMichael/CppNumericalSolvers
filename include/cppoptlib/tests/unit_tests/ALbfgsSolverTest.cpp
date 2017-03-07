@@ -4,7 +4,7 @@
 
 #include <gmock/gmock.h>
 #include "lbfgssolver.h"
-#include "TestProblems.h"
+#include "TestProblems.cpp"
 
 using namespace testing;
 

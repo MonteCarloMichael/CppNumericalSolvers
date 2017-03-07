@@ -1,6 +1,5 @@
 // CppNumericalSolver
 #include <iostream>
-#include <Eigen/LU>
 #include "isolver.h"
 #include "../linesearch/armijowolfe.h"
 #include "../linesearch/smallestvectorinconvexhullfinder.h"
@@ -11,7 +10,7 @@
 namespace cppoptlib {
 
   template<typename ProblemType>
-  class BfgsNsSolver : public ISolver<ProblemType, 1> {
+  class BfgsnsSolver : public ISolver<ProblemType, 1> {
   public:
     //static const int Dim = ProblemType::Dim;
     //static const size_t MaxIt = static_cast<size_t>(m_stop.iterations);
@@ -45,7 +44,7 @@ namespace cppoptlib {
       this->m_current.reset();
       do {
         k = this->m_current.iterations;
-
+        std::cout << k << std::endl;
         TVector searchDir = -1 * H * grad;
         // check "positive definite"
         Scalar phi = grad.dot(searchDir);
@@ -84,7 +83,7 @@ namespace cppoptlib {
           gradientSetSelection.col(0) = grad;
         }
         else {
-          assert( j(k-1) <= J );
+          assert( j(k-1) <= J && "j must be smaller than J");
           // check second last element
           if ( j(k-1) < J ) {
             j(k) = j(k-1) + 1;

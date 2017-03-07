@@ -5,7 +5,7 @@
 #include <gmock/gmock.h>
 //#include "./../../linesearch/smallestvectorinconvexhullfinder.h
 #include "linesearch/smallestvectorinconvexhullfinder.h"
-#include "TestProblems.h"
+#include "TestProblems.cpp"
 
 using namespace testing;
 
