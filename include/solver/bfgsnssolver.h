@@ -44,7 +44,6 @@ namespace cppoptlib {
       this->m_current.reset();
       do {
         k = this->m_current.iterations;
-        std::cout << k << std::endl;
         TVector searchDir = -1 * H * grad;
         // check "positive definite"
         Scalar phi = grad.dot(searchDir);
@@ -68,14 +67,14 @@ namespace cppoptlib {
         TVector y = grad - grad_old;
 
         // prepare next step
+
         // Update the hessian
         const Scalar rho = 1.0 / y.dot(s);
         H = H - rho * (s * (y.transpose() * H) + (H * y) * s.transpose())
             + rho * rho * (y.dot(H * y) + 1.0 / rho) * (s * s.transpose());
 
         j(0) = 1;
-        Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> gradientSetSelection; //TODO CHECK J+1?
-        //TODO make a matrix and then resize it
+        Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> gradientSetSelection;
 
         if ( (x0 - x_old).norm() > xTolerance ){
           j(k) = 1;
