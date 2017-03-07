@@ -16,39 +16,39 @@ set(CMAKE_CXX_FLAGS "-g -Wall")
 find_package(Eigen3 REQUIRED)
 
 include_directories(
-        include/cppoptlib
-        include/cpppoptlib/linesearch
-        include/cppoptlib/solver
+        include
+        include/linesearch
+        include/solver
         ${EIGEN3_INCLUDE_DIR}
 )
 
 set(HEADER_FILES
-        include/cppoptlib/boundedproblem.h
-        include/cppoptlib/meta.h
-        include/cppoptlib/problem.h
-        include/cppoptlib/timer.h
-        include/cppoptlib/linesearch/armijo.h
-        include/cppoptlib/linesearch/morethuente.h
-        include/cppoptlib/linesearch/wolfeheuristic.h
-        include/cppoptlib/solver/bfgssolver.h
-        include/cppoptlib/solver/lbfgssolver.h
-        include/cppoptlib/solver/lbfgsbsolver.h
-        include/cppoptlib/solver/cmaesbsolver.h
-        include/cppoptlib/solver/cmaesbsolver.h
-        include/cppoptlib/solver/cmaessolver.h
-        include/cppoptlib/solver/conjugatedgradientdescentsolver.h
-        include/cppoptlib/solver/gradientdescentsolver.h
-        include/cppoptlib/solver/isolver.h
-        include/cppoptlib/solver/neldermeadsolver.h
-        include/cppoptlib/solver/newtondescentsolver.h
-        include/cppoptlib/solver/newtonraphsonsolver.h
-        include/cppoptlib/solver/bfgsnssolver.h
-        include/cppoptlib/linesearch/armijowolfe.h
-        include/cppoptlib/linesearch/smallestvectorinconvexhullfinder.h
+        include/boundedproblem.h
+        include/meta.h
+        include/problem.h
+        include/timer.h
+        include/linesearch/armijo.h
+        include/linesearch/morethuente.h
+        include/linesearch/wolfeheuristic.h
+        include/solver/bfgssolver.h
+        include/solver/lbfgssolver.h
+        include/solver/lbfgsbsolver.h
+        include/solver/cmaesbsolver.h
+        include/solver/cmaesbsolver.h
+        include/solver/cmaessolver.h
+        include/solver/conjugatedgradientdescentsolver.h
+        include/solver/gradientdescentsolver.h
+        include/solver/isolver.h
+        include/solver/neldermeadsolver.h
+        include/solver/newtondescentsolver.h
+        include/solver/newtonraphsonsolver.h
+        include/solver/bfgsnssolver.h
+        include/linesearch/armijowolfe.h
+        include/linesearch/smallestvectorinconvexhullfinder.h
         )
 
 set(SOURCE_FILES
-        include/cppoptlib/empty.cpp
+        include/empty.cpp
         )#TODO this is a very bad solution used instead of setting the target properties
 
 add_library(${PROJECT_NAME} STATIC ${SOURCE_FILES} ${HEADER_FILES})
@@ -60,4 +60,4 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 
 add_library(Externals::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
-add_subdirectory(include/cppoptlib/tests)
+add_subdirectory(include/tests)
