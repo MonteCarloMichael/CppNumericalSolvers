@@ -82,7 +82,6 @@ namespace cppoptlib {
       int maxit = 100;
       int k;
       for (k=0; k < maxit; ++k) {
-
         r1 = -Q*x + e * y + z;
         r2 = -1 + x.sum();
         r3 = -x.array() * z.array();
@@ -139,8 +138,9 @@ namespace cppoptlib {
         p = -z.array() / dz.array();
         ad = calculateStepSize(p);
         x = x + (dx * (stepSizeDamping * ap));
-        y = y + dy * ad * stepSizeDamping;
+        y = y + (dy * (ad * stepSizeDamping));
         z = z + (dz * (stepSizeDamping * ad));
+        z=z;
       };
 
       //TODO - use log from cppoptlib
@@ -154,18 +154,18 @@ namespace cppoptlib {
       //set other output variables using best found x
       d = G * x;
       //q = d.norm();//d.dot(d); // TODO NEEDED?
-
       return std::make_pair(x,d);
     };
 
-    Scalar calculateStepSize(const TSetVector &x) {
-      Scalar min;
-      if( x[0] < 0 ) min = std::numeric_limits<Scalar>::max();
-      else min = x[0];
-
-      for (int i = 1; i < x.rows(); ++i) {
-        if ((x[i] < x[i - 1]) && (x[i] > static_cast<Scalar>(0.0))) min = x[i];
+    Scalar calculateStepSize(const TSetVector &v) {
+      // find element the smallest positive element of v or choose one
+      Scalar min = std::numeric_limits<Scalar>::max();;
+      //if( v[0] < 0 ) min = std::numeric_limits<Scalar>::max();
+      //else min = v[0];
+      for (int i = 0; i < v.size(); ++i) {
+        if ((v[i] < min) && (v[i] > static_cast<Scalar>(0.0))) min = v[i];
       }
+
       if (min > static_cast<Scalar>(1.0)) return static_cast<Scalar>(1.0);
       else return min;
     }
