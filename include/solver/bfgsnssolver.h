@@ -36,11 +36,11 @@ namespace cppoptlib {
       // members for nonsmooth opt
       const int J = 50; // J = 1 reduces to the usual stopping condition, when f is smooth
       Eigen::Matrix<Scalar, Eigen::Dynamic, 1> j(MaxIt,1);
+      j(0) = 1;
 
       const Scalar xTolerance = 1e-4;
 
       int k;
-
       this->m_current.reset();
       do {
         k = this->m_current.iterations;
@@ -73,7 +73,6 @@ namespace cppoptlib {
         H = H - rho * (s * (y.transpose() * H) + (H * y) * s.transpose())
             + rho * rho * (y.dot(H * y) + 1.0 / rho) * (s * s.transpose());
 
-        j(0) = 1;
         Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> gradientSetSelection;
 
         if ( (x0 - x_old).norm() > xTolerance ){
@@ -81,8 +80,7 @@ namespace cppoptlib {
           gradientSetSelection.resize(DIM,1);
           gradientSetSelection.col(0) = grad;
         }
-        else {
-          assert( j(k-1) <= J && "j must be smaller than J");
+        else { //TODO CHECK FOR k > 0
           // check second last element
           if ( j(k-1) < J ) {
             j(k) = j(k-1) + 1;
@@ -96,19 +94,16 @@ namespace cppoptlib {
             gradientSetSelection = gradientSet.block(0,k-J+1,DIM,J); // J elements
           }
         }
-        Scalar dknorm;
         if( j(k) > 1 ) {
-          SmallestVectorInConvexHullFinder<Scalar>finder; // TODO add max values with MaxIt
+          SmallestVectorInConvexHullFinder<Scalar> finder; // TODO add max values with MaxIt
           finder.resizeFinder(DIM, gradientSetSelection.rows());
-          dknorm = finder.findSmallestVectorInConvexHull(gradientSetSelection).second.norm();
-        } else{
-          dknorm = grad.norm();
+          grad = finder.findSmallestVectorInConvexHull(gradientSetSelection).second;
         }
 
         x_old = x0;
 
         ++this->m_current.iterations;
-        this->m_current.gradNorm = dknorm;
+        this->m_current.gradNorm = grad.norm();
         this->m_status = checkConvergence(this->m_stop, this->m_current);
       } while (objFunc.callback(this->m_current, x0) && (this->m_status == Status::Continue));
     }
