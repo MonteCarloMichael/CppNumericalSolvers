@@ -15,11 +15,11 @@ class ALbfgsSolverTest : public Test {};
 TEST_F(ALbfgsSolverTest, Minimum) {
   Eigen::VectorXd  x(2);
   x << 1.0, 1.0;
-  MinimumProblem f;
+  Minimum2DProblem f;
 
   cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::defaults();
   crit.iterations = 100;
-  cppoptlib::LbfgsSolver<MinimumProblem> solver;
+  cppoptlib::LbfgsSolver<Minimum2DProblem> solver;
   solver.setDebug(cppoptlib::DebugLevel::High);
   solver.setStopCriteria(crit);
   solver.minimize(f, x);
@@ -32,11 +32,11 @@ TEST_F(ALbfgsSolverTest, Minimum) {
 TEST_F(ALbfgsSolverTest, Cusp) {
   Eigen::VectorXd  x(1);
   x << 1.0;
-  CuspProblem f;
+  CuspProblem1D f;
 
   cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::defaults();
   crit.iterations = 100;
-  cppoptlib::LbfgsSolver<CuspProblem> solver;
+  cppoptlib::LbfgsSolver<CuspProblem1D> solver;
   solver.setDebug(cppoptlib::DebugLevel::High);
   solver.setStopCriteria(crit);
   solver.minimize(f, x);

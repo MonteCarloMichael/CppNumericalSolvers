@@ -12,11 +12,11 @@ class ANewtonRaphsonSolverTest : public Test {};
 TEST_F(ANewtonRaphsonSolverTest, Minimum) {
   Eigen::VectorXd  x(2);
   x << 1.0, 1.0;
-  MinimumProblem f;
+  Minimum2DProblem f;
 
   cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::defaults();
   crit.iterations = 100;
-  cppoptlib::NewtonRaphsonSolver<MinimumProblem> solver;
+  cppoptlib::NewtonRaphsonSolver<Minimum2DProblem> solver;
   solver.setDebug(cppoptlib::DebugLevel::High);
   solver.setStopCriteria(crit);
   solver.minimize(f, x);
