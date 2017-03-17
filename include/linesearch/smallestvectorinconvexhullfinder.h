@@ -23,6 +23,7 @@ namespace cppoptlib {
     using TSquareSetMatrix  = Eigen::Matrix<Scalar, SetSize, SetSize>;
     using TFlattenedSquareMatrix = Eigen::Matrix<Scalar, SetSize*SetSize, 1>;
 
+    //TODO find a more efficient way
     void resizeFinder(const long int newDim, const long int newSetSize){
       // resize TVectors members
       r1.resize(newSetSize,1);
@@ -61,16 +62,15 @@ namespace cppoptlib {
       z = x; // initialize
       y = static_cast<Scalar>(0.0);
 
-      //TODO/const Scalar mu0 = x.transpose().dot(z) / static_cast<Scalar>(SetSize);
-      const Scalar mu0 = 1.0;
+      //Parameters
+      const Scalar mu0 = x.transpose().dot(z) / static_cast<Scalar>(SetSize);
+      //TODO: why not : //const Scalar mu0 = 1.0 // equivalent?
       const Scalar muTolerance = 1e-5;
       const Scalar residualNormTolerance = 1e-5;
+      const Scalar stepSizeDamping = 0.9995;
+      int deltaSigmaHeuristic = 3;
 
       Q = G.transpose() * G;
-
-      //Parameters
-      Scalar stepSizeDamping = 0.9995;
-      int deltaSigmaHeuristic = 3;
 
       const Scalar infinityNormedQ = Q.cwiseAbs().rowwise().sum().maxCoeff() + static_cast<Scalar>(2.0);
 
@@ -125,7 +125,7 @@ namespace cppoptlib {
 
         muaff = ((x + dx*ap).dot(z + dz * ad)) / static_cast<Scalar>(G.cols());
         sig = std::pow(muaff / mu, deltaSigmaHeuristic);
-        // compute the new corrected search direction taht now includes appropriate amount of centering and mehrotras
+        // compute the new corrected search direction that now includes appropriate amount of centering and mehrotras
         // second order correction term ( see r3 ). We of course reuse the factorization from above
         r3.array() += sig * mu;
         r3.array() -= (dx.array() * dz.array());
@@ -144,16 +144,16 @@ namespace cppoptlib {
       };
 
       //TODO - use log from cppoptlib
-      //if (k == maxit) std::cout << "max it reached" << std::endl;
+      //if (k >= maxit) std::cout << "convex hull max it reached" << std::endl;
       //else std::cout << "optimal convex hull vector found after " << k << " iterations"  << std::endl;
 
       replaceNegativeElementsByZero(x);// Project x onto R+
 
       x /= x.sum(); // normalize
 
-      //set other output variables using best found x
+
+      // calculate smallest vector in convex hull
       d = G * x;
-      //q = d.norm();//d.dot(d); // TODO NEEDED?
       return std::make_pair(x,d);
     };
 
