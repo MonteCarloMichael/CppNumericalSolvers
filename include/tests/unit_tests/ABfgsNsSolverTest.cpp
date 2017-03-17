@@ -97,6 +97,46 @@ TEST_F(ABfgsNsSolverTest, Cusp3D) {
   ASSERT_TRUE( (x-xref).norm() < 0.001);
 }
 
+TEST_F(ABfgsNsSolverTest, CuspXD) {
+  Eigen::VectorXd  x(3);
+  x << 3.0,3.0,3.0;
+  CuspProblemXD f;
+
+  cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::defaults();
+  crit.iterations = 100;
+  cppoptlib::BfgsnsSolver<CuspProblemXD> solver;
+  solver.setDebug(cppoptlib::DebugLevel::High);
+  solver.setStopCriteria(crit);
+  solver.minimize(f, x);
+
+  Eigen::VectorXd xref(3);
+  xref << 0.0,0.0,0.0;
+  ASSERT_TRUE( (x-xref).norm() < 0.001);
+}
+
+TEST_F(ABfgsNsSolverTest, H2likeProblem) {
+  Eigen::VectorXd  x(6);
+  x << 0.02,-0.5,1.0,0.0,+0.05,-2.0;
+  H2likeProblem f;
+
+  cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::nonsmoothDefaults();
+  crit.iterations = 100;
+  //crit.xDelta = 1e-6;
+  crit.gradNorm = 1e-4;
+  cppoptlib::BfgsnsSolver<H2likeProblem> solver;
+  solver.setDebug(cppoptlib::DebugLevel::High);
+  //solver.setStopCriteria(crit);
+  solver.minimize(f, x);
+
+  std::cout << "f in argmin " << f(x) << std::endl;
+  std::cout << "Solver status: " << solver.status() << std::endl;
+  std::cout << "Final criteria values: " << std::endl << solver.criteria() << std::endl;
+
+  Eigen::VectorXd xref(6);
+  xref << 0.0,0.0,-0.7,0.0,0.0,+0.7;
+  ASSERT_TRUE( (x-xref).norm() < 0.001);
+}
+
 TEST_F(ABfgsNsSolverTest, Rosenbrock2D) {
   Eigen::VectorXd  x(2);
   x << -1.0,2.0; // 3.0, 3.0 works
@@ -109,6 +149,7 @@ TEST_F(ABfgsNsSolverTest, Rosenbrock2D) {
   solver.setStopCriteria(crit);
   solver.minimize(f, x);
 
+
   Eigen::VectorXd xref(2);
   xref << 1.0,1.0;
   EXPECT_NEAR( 0.0, f(x), 0.0001 );
@@ -117,13 +158,12 @@ TEST_F(ABfgsNsSolverTest, Rosenbrock2D) {
 
 TEST_F(ABfgsNsSolverTest, NesterovFirst2D) {
   Eigen::VectorXd  x(2);
-  //x << -1.0,0.0; // 3.0, 3.0 works
   x << 1.2, 1.2;
   NesterovFirst2D f;
 
   cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::defaults();
   crit.iterations = 300;
-  crit.gradNorm = 1e-8;
+  crit.gradNorm = 1e-4;
   cppoptlib::BfgsnsSolver<NesterovFirst2D> solver;
   solver.setDebug(cppoptlib::DebugLevel::High);
   solver.setStopCriteria(crit);

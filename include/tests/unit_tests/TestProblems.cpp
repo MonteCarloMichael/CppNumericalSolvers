@@ -111,6 +111,31 @@ public:
   }
 };
 
+class CuspProblemXD : public cppoptlib::Problem<double,Eigen::Dynamic> {
+public:
+  double value(const Eigen::VectorXd &x) {
+    return -exp(-x.norm());
+  }
+};
+
+class H2likeProblem : public cppoptlib::Problem<double,Eigen::Dynamic> {
+public:
+  Eigen::Vector3d shift = Eigen::Vector3d(0.0,0.0,0.7);
+
+  double value(const Eigen::VectorXd &x) {
+    return -( exp(-(x.head(3)-shift).norm())+ exp(-(x.tail(3)+shift).norm()) );
+  }
+  bool callback(const cppoptlib::Criteria<double> &state, const Eigen::VectorXd &x) {
+    std::cout << "(" << std::setw(2) << state.iterations << ")"
+              << " f(x) = "     << std::fixed << std::setw(8) << std::setprecision(8) << value(x)
+              << " gradNorm = " << std::setw(8) << state.gradNorm
+              << " xDelta = "   << std::setw(8) << state.xDelta
+              << " x = [" << std::setprecision(16) << x.transpose() << "]"
+              << std::endl;
+    return true;
+  }
+};
+
 class NesterovFirst2D : public cppoptlib::Problem<double,Eigen::Dynamic> {
 public:
   using typename cppoptlib::Problem<double>::Scalar;
