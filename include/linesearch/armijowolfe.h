@@ -42,11 +42,11 @@ namespace cppoptlib {
 
       objFunc.gradient(x, grad);
 
-      const Scalar searchDirectionProjectedOnGradient_init = grad.dot(searchDir);
+      const Scalar searchDirectionProjectedOnInitialGradient = grad.dot(searchDir);
       Scalar projectedGradAtAlpha;
 
-      const Scalar sc1 = c1 * searchDirectionProjectedOnGradient_init;
-      const Scalar sc2 = c2 * searchDirectionProjectedOnGradient_init;
+      const Scalar sc1 = c1 * searchDirectionProjectedOnInitialGradient;
+      const Scalar sc2 = c2 * searchDirectionProjectedOnInitialGradient;
 
       // set parameters
       const Scalar searchDirNorm = searchDir.norm();
