@@ -89,6 +89,16 @@ public:
         return d;
     }
 
+    static Criteria nonsmoothDefaults() {
+      Criteria d;
+      d.iterations = 10000;
+      d.xDelta = 1e-4;
+      d.fDelta = 0;
+      d.gradNorm = 1e-4;
+      d.condition = 0;
+      return d;
+    }
+
     void reset() {
         iterations = 0;
         xDelta = 0;

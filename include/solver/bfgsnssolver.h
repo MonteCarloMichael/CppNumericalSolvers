@@ -12,13 +12,14 @@ namespace cppoptlib {
   template<typename ProblemType>
   class BfgsnsSolver : public ISolver<ProblemType, 1> {
   public:
-    //static const int Dim = ProblemType::Dim;
-    //static const size_t MaxIt = static_cast<size_t>(m_stop.iterations);
     using Superclass = ISolver<ProblemType, 1>;
     using typename Superclass::Scalar;
     using typename Superclass::TVector;
     using typename Superclass::THessian;
+    using TCriteria = typename ProblemType::TCriteria;
     using MatrixType = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>;
+
+    BfgsnsSolver() : ISolver<ProblemType,1>(TCriteria::nonsmoothDefaults()){};
 
     void minimize(ProblemType &objFunc, TVector & x0) {
       const size_t DIM = x0.rows();
@@ -38,8 +39,6 @@ namespace cppoptlib {
       Eigen::Matrix<Scalar, Eigen::Dynamic, 1> j(MaxIt,1);
       j(0) = 1;
 
-      const Scalar xTolerance = 1e-4;
-
       int k;
       this->m_current.reset();
       do {
@@ -48,17 +47,21 @@ namespace cppoptlib {
         // check "positive definite"
         Scalar phi = grad.dot(searchDir);
 
-        // Check if search direction is a descent direction (positive definit)
+        // Check if search direction is a descent direction
         if (phi > 0) {
           // no, we reset the hessian approximation
           H = THessian::Identity(DIM, DIM);
-          searchDir = -1 * grad;
+          searchDir = -grad;
         }
 
         // do step
-        const Scalar rate = ArmijoWolfe<ProblemType, 1>::linesearch(x0, searchDir, objFunc) ;
-        x0 = x0 + rate * searchDir;
-        TVector s = rate * searchDir;
+        //TODO give linesearch the initial gradient
+        const Scalar stepLength = ArmijoWolfe<ProblemType, 1>::linesearch(x0, searchDir, //grad,
+                                                                    objFunc);
+        TVector step = stepLength * searchDir;
+        x0 = x0 + step;
+        this->m_current.xDelta = (x_old - x0).norm();
+
 
         TVector grad_old = grad;
         objFunc.gradient(x0, grad);
@@ -67,15 +70,15 @@ namespace cppoptlib {
         TVector y = grad - grad_old;
 
         // prepare next step
-
         // Update the hessian
-        const Scalar rho = 1.0 / y.dot(s);
-        H = H - rho * (s * (y.transpose() * H) + (H * y) * s.transpose())
-            + rho * rho * (y.dot(H * y) + 1.0 / rho) * (s * s.transpose());
+        const Scalar rho = 1.0 / y.dot(step);
+        H = H - rho * (step * (y.transpose() * H) + (H * y) * step.transpose())
+            + rho * rho * (y.dot(H * y) + 1.0 / rho) * (step * step.transpose());
 
         Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> gradientSetSelection;
 
-        if ( (x0 - x_old).norm() > xTolerance ){
+        //if ( (x0 - x_old).norm() > xTolerance){
+        if ( this->m_current.xDelta > this->m_stop.xDelta ){
           j(k) = 1;
           gradientSetSelection.resize(DIM,1);
           gradientSetSelection.col(0) = grad;
