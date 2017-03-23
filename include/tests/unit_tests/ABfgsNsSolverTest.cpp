@@ -34,7 +34,7 @@ TEST_F(ABfgsNsSolverTest, Absolute1D) {
   x << 3.0;
   AbsoluteProblem1D f;
 
-  cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::defaults();
+  cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::nonsmoothDefaults();
   crit.iterations = 100;
   cppoptlib::BfgsnsSolver<AbsoluteProblem1D> solver;
   solver.setDebug(cppoptlib::DebugLevel::High);
@@ -51,7 +51,7 @@ TEST_F(ABfgsNsSolverTest, Cusp1D) {
   x << 3.0;
   CuspProblem1D f;
 
-  cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::defaults();
+  cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::nonsmoothDefaults();
   crit.iterations = 100;
   cppoptlib::BfgsnsSolver<CuspProblem1D> solver;
   solver.setDebug(cppoptlib::DebugLevel::High);
@@ -68,7 +68,7 @@ TEST_F(ABfgsNsSolverTest, Cusp2D) {
   x << 3.0,3.0;
   CuspProblem2D f;
 
-  cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::defaults();
+  cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::nonsmoothDefaults();
   crit.iterations = 100;
   cppoptlib::BfgsnsSolver<CuspProblem2D> solver;
   solver.setDebug(cppoptlib::DebugLevel::High);
@@ -85,7 +85,7 @@ TEST_F(ABfgsNsSolverTest, Cusp3D) {
   x << 3.0,3.0,3.0;
   CuspProblem3D f;
 
-  cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::defaults();
+  cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::nonsmoothDefaults();
   crit.iterations = 100;
   cppoptlib::BfgsnsSolver<CuspProblem3D> solver;
   solver.setDebug(cppoptlib::DebugLevel::High);
@@ -102,7 +102,7 @@ TEST_F(ABfgsNsSolverTest, CuspXD) {
   x << 3.0,3.0,3.0;
   CuspProblemXD f;
 
-  cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::defaults();
+  cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::nonsmoothDefaults();
   crit.iterations = 100;
   cppoptlib::BfgsnsSolver<CuspProblemXD> solver;
   solver.setDebug(cppoptlib::DebugLevel::High);
