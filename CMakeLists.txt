@@ -12,15 +12,11 @@ message ( "-- ++ CREATING PROJECT OR MAKEFILE ---> ${OUTPUT_NAME}" )
 
 set(CMAKE_CXX_FLAGS "-g -Wall")
 
-# Find Eigen lib
-find_package(Eigen3 REQUIRED)
-
 include_directories(
         include
         include/linesearch
         include/solver
-        ${EIGEN3_INCLUDE_DIR}
-)
+        )
 
 set(HEADER_FILES
         include/boundedproblem.h
@@ -50,13 +46,18 @@ set(HEADER_FILES
 set(SOURCE_FILES
         include/empty.cpp
         )#TODO this is a very bad solution used instead of setting the target properties
-
 add_library(${PROJECT_NAME} STATIC ${SOURCE_FILES} ${HEADER_FILES})
+
+#add_library(${PROJECT_NAME} STATIC ${HEADER_FILES})
+#set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
+
+target_link_libraries(${PROJECT_NAME}
+        eigen
+        )
 
 target_include_directories(${PROJECT_NAME} PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         )
-#set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 
 add_library(Externals::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
