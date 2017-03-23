@@ -22,7 +22,7 @@ namespace cppoptlib {
       const int DIM = x0.rows();
       TVector grad = TVector::Zero(DIM);
       THessian hessian = THessian::Zero(DIM, DIM);
-      Scalar gradNorm = 0;
+
       this->m_current.reset();
       do {
         objFunc.gradient(x0, grad);
@@ -30,7 +30,7 @@ namespace cppoptlib {
         TVector delta_x = hessian.lu().solve(-grad);
         x0 = x0 + delta_x;
         ++this->m_current.iterations;
-        this->m_current.gradNorm = grad.template lpNorm<Eigen::Infinity>();
+        this->m_current.gradNorm = grad.norm();
         this->m_status = checkConvergence(this->m_stop, this->m_current);
       } while (objFunc.callback(this->m_current, x0) && (this->m_status == Status::Continue));
     }
