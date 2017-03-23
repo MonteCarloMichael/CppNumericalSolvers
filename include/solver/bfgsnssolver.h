@@ -1,4 +1,7 @@
 // CppNumericalSolver
+//
+// Created by Michael Heuer on 06.02.17.
+//
 #include <iostream>
 #include "isolver.h"
 #include "../linesearch/armijowolfe.h"
@@ -29,7 +32,7 @@ namespace cppoptlib {
       TVector grad(DIM);
       objFunc.gradient(x0, grad);
 
-      MatrixType gradientSet = MatrixType::Zero(DIM,MaxIt); // TODO better define size?
+      MatrixType gradientSet = MatrixType::Zero(DIM,MaxIt);
       gradientSet.col(0) = grad;
 
       TVector x_old = x0;
@@ -106,7 +109,7 @@ namespace cppoptlib {
         x_old = x0;
 
         ++this->m_current.iterations;
-        this->m_current.gradNorm = grad.norm();
+        this->m_current.gradNorm = grad.norm(); //TODO calculate only for smooth variables, HOW TO IDENTIFY THEM?
         this->m_status = checkConvergence(this->m_stop, this->m_current);
       } while (objFunc.callback(this->m_current, x0) && (this->m_status == Status::Continue));
     }
