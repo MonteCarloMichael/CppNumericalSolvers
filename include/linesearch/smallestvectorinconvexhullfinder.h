@@ -160,8 +160,6 @@ namespace cppoptlib {
     Scalar calculateStepSize(const TSetVector &v) {
       // find element the smallest positive element of v or choose one
       Scalar min = std::numeric_limits<Scalar>::max();;
-      //if( v[0] < 0 ) min = std::numeric_limits<Scalar>::max();
-      //else min = v[0];
       for (int i = 0; i < v.size(); ++i) {
         if ((v[i] < min) && (v[i] > static_cast<Scalar>(0.0))) min = v[i];
       }
