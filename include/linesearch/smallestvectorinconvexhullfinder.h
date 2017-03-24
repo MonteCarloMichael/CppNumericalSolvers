@@ -63,7 +63,7 @@ namespace cppoptlib {
       y = static_cast<Scalar>(0.0);
 
       //Parameters
-      const Scalar mu0 = x.transpose().dot(z) / static_cast<Scalar>(SetSize);
+      const Scalar mu0 = x.transpose().dot(z) / static_cast<Scalar>(G.cols());
       //TODO: why not : //const Scalar mu0 = 1.0 // equivalent?
       const Scalar muTolerance = 1e-5;
       const Scalar residualNormTolerance = 1e-5;
