@@ -71,7 +71,7 @@ namespace cppoptlib {
 
       //Parameters
       const Scalar mu0 = x.transpose().dot(z) / static_cast<Scalar>(G.cols()); // like this  mu0 = 1, in the original
-      // implementation, x can be specified and its default is {}
+      // implementation, x can be specified and its default is {1,...,1}
       const Scalar stepSizeDamping = 0.9995;
       int deltaSigmaHeuristic = 3;
 

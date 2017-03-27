@@ -58,35 +58,36 @@ namespace cppoptlib {
         }
 
         // do step
-        //TODO give linesearch the initial gradient
-        const Scalar stepLength = ArmijoWolfe<ProblemType, 1>::linesearch(x0, searchDir, //grad,
-                                                                    objFunc);
+        const Scalar stepLength = ArmijoWolfe<ProblemType, 1>::linesearch(x0, searchDir, objFunc);
         TVector step = stepLength * searchDir;
         x0 = x0 + step;
         this->m_current.xDelta = (x_old - x0).norm();
 
 
+        // store gradient from previous step and calculate the current gradient for the gradient set
         TVector grad_old = grad;
         objFunc.gradient(x0, grad);
         gradientSet.col(k) = grad;
 
-        TVector y = grad - grad_old;
-
-        // prepare next step
-        // Update the hessian
+        // update the hessian, based on the current gradient (that can be the result of the convex hull search in the
+        // gradient set) to prepare for the next iteration step
+        /*TVector y = grad - grad_old;
         const Scalar rho = 1.0 / y.dot(step);
         H = H - rho * (step * (y.transpose() * H) + (H * y) * step.transpose())
-            + rho * rho * (y.dot(H * y) + 1.0 / rho) * (step * step.transpose());
+            + rho * rho * (y.dot(H * y) + 1.0 / rho) * (step * step.transpose());*/
 
         Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> gradientSetSelection;
 
-        //if ( (x0 - x_old).norm() > xTolerance){
-        if ( this->m_current.xDelta > this->m_stop.xDelta ){
+        // if the current difference in the parameter vector is 10 times as large as the stop criterion, store only
+        // the current gradient to do a normal BFGS step
+        if ( this->m_current.xDelta > this->m_stop.xDelta *10 ){
           j(k) = 1;
           gradientSetSelection.resize(DIM,1);
           gradientSetSelection.col(0) = grad;
         }
-        else { //TODO CHECK FOR k > 0
+          // else add gradient to the set of prior gradients to do a BFGS-NS step including a convex hull search
+          // which calculates a new current gradient estimate
+        else {
           // check second last element
           if ( j(k-1) < J ) {
             j(k) = j(k-1) + 1;
@@ -101,15 +102,23 @@ namespace cppoptlib {
           }
         }
         if( j(k) > 1 ) {
-          SmallestVectorInConvexHullFinder<Scalar> finder; // TODO add max values with MaxIt
+          SmallestVectorInConvexHullFinder<ProblemType,Scalar> finder(this->m_stop);
           finder.resizeFinder(DIM, gradientSetSelection.rows());
           grad = finder.findSmallestVectorInConvexHull(gradientSetSelection).second;
         }
 
         x_old = x0;
 
+        // update the hessian, based on the current gradient (that can be the result of the convex hull search in the
+        // gradient set) to prepare for the next iteration step
+        TVector y = grad - grad_old;
+        const Scalar rho = 1.0 / y.dot(step);
+        H = H - rho * (step * (y.transpose() * H) + (H * y) * step.transpose())
+            + rho * rho * (y.dot(H * y) + 1.0 / rho) * (step * step.transpose());
+
+
         ++this->m_current.iterations;
-        this->m_current.gradNorm = grad.norm(); //TODO calculate only for smooth variables, HOW TO IDENTIFY THEM?
+        this->m_current.gradNorm = grad.norm(); //TODO calculate gradient norm only for smooth variables?
         this->m_status = checkConvergence(this->m_stop, this->m_current);
       } while (objFunc.callback(this->m_current, x0) && (this->m_status == Status::Continue));
     }
