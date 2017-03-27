@@ -7,13 +7,12 @@
 
 #include <Eigen/Cholesky>
 #include <Eigen/LU>
-#include "../solver/isolver.h"
-#include "../problem.h"
+
 
 namespace cppoptlib {
 
 
-  template<typename ProblemType, typename Scalar_, long int Dim_ = Eigen::Dynamic, long int SetSize_ = Eigen::Dynamic>
+  template<typename Scalar_, long int Dim_ = Eigen::Dynamic, long int SetSize_ = Eigen::Dynamic>
   class SmallestVectorInConvexHullFinder {
   public:
     static const long int Dim = Dim_;
@@ -25,10 +24,7 @@ namespace cppoptlib {
     using TSquareSetMatrix  = Eigen::Matrix<Scalar, SetSize, SetSize>;
     using TFlattenedSquareMatrix = Eigen::Matrix<Scalar, SetSize*SetSize, 1>;
 
-    using TCriteria = typename ProblemType::TCriteria;
-
-    SmallestVectorInConvexHullFinder(const TCriteria &stop)
-      : muTolerance(stop.xDelta), residualNormTolerance(stop.xDelta){}
+    SmallestVectorInConvexHullFinder(){};
 
     //TODO find a more efficient way
     void resizeFinder(const long int newDim, const long int newSetSize){
@@ -56,7 +52,9 @@ namespace cppoptlib {
 
     /* Computing shortest l2-norm vector in convex hull of cached gradients:
      */
-    std::pair<TSetVector,TVector> findSmallestVectorInConvexHull(const TSetMatrix &G) {
+    std::pair<TSetVector,TVector> findSmallestVectorInConvexHull(const TSetMatrix &G,
+                                                                 const Scalar &muTolerance,
+                                                                 const Scalar &residualNormTolerance) {
       // x: primal variables
       // y: dual lagrange mutlipliers
       // z: dual slack variables
@@ -191,9 +189,6 @@ namespace cppoptlib {
     };
 
   private:
-    TCriteria m_stop;
-    const Scalar muTolerance;
-    const Scalar residualNormTolerance;
 
     Scalar r2, rs, mu, muaff, ap, ad, sig, r5, r6, M, dy,\
       y, q;

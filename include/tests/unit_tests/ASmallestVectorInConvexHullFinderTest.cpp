@@ -2,10 +2,9 @@
 // Created by Michael Heuer on 13.02.17.
 //
 
-#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 #include "linesearch/smallestvectorinconvexhullfinder.h"
-#include "TestProblems.cpp"
-#include <iomanip>
+
 
 using namespace testing;
 
@@ -28,7 +27,7 @@ TEST_F(ASmallestVectorInConvexHullFinderTest , Example1) {
 
   cppoptlib::SmallestVectorInConvexHullFinder<Scalar, Dim, SetSize> finder;
 
-  auto result = finder.findSmallestVectorInConvexHull(G);
+  auto result = finder.findSmallestVectorInConvexHull(G, 1e-4, 1e-4);
   TSetVector resultSetPoint = result.first;
   TVector resultVector = result.second;
 
@@ -75,7 +74,7 @@ TEST_F(ASmallestVectorInConvexHullFinderTest , Example2) {
 
   cppoptlib::SmallestVectorInConvexHullFinder<Scalar, Dim, SetSize> finder;
 
-  auto result = finder.findSmallestVectorInConvexHull(G);
+  auto result = finder.findSmallestVectorInConvexHull(G,1e-4,1e-4);
   TSetVector resultSetPoint = result.first;
   TVector resultVector = result.second;
 

@@ -22,7 +22,7 @@ namespace cppoptlib {
     using TCriteria = typename ProblemType::TCriteria;
     using MatrixType = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>;
 
-    BfgsnsSolver() : ISolver<ProblemType,1>(TCriteria::nonsmoothDefaults()){};
+    BfgsnsSolver() : ISolver<ProblemType,1>( TCriteria::nonsmoothDefaults() ){};
 
     void minimize(ProblemType &objFunc, TVector & x0) {
       const size_t DIM = x0.rows();
@@ -69,13 +69,6 @@ namespace cppoptlib {
         objFunc.gradient(x0, grad);
         gradientSet.col(k) = grad;
 
-        // update the hessian, based on the current gradient (that can be the result of the convex hull search in the
-        // gradient set) to prepare for the next iteration step
-        /*TVector y = grad - grad_old;
-        const Scalar rho = 1.0 / y.dot(step);
-        H = H - rho * (step * (y.transpose() * H) + (H * y) * step.transpose())
-            + rho * rho * (y.dot(H * y) + 1.0 / rho) * (step * step.transpose());*/
-
         Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> gradientSetSelection;
 
         // if the current difference in the parameter vector is 10 times as large as the stop criterion, store only
@@ -102,9 +95,9 @@ namespace cppoptlib {
           }
         }
         if( j(k) > 1 ) {
-          SmallestVectorInConvexHullFinder<ProblemType,Scalar> finder(this->m_stop);
+          SmallestVectorInConvexHullFinder<Scalar> finder;
           finder.resizeFinder(DIM, gradientSetSelection.rows());
-          grad = finder.findSmallestVectorInConvexHull(gradientSetSelection).second;
+          grad = finder.findSmallestVectorInConvexHull(gradientSetSelection,this->m_stop.xDelta,this->m_stop.xDelta).second;
         }
 
         x_old = x0;
