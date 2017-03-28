@@ -34,6 +34,8 @@ set(HEADER_FILES
         include/solver/cmaessolver.h
         include/solver/conjugatedgradientdescentsolver.h
         include/solver/gradientdescentsolver.h
+        include/solver/gradientdescentnssolver.h
+        include/solver/gradientdescentsimplesolver.h
         include/solver/isolver.h
         include/solver/neldermeadsolver.h
         include/solver/newtondescentsolver.h
