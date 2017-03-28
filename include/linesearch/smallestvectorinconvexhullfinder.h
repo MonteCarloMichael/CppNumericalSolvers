@@ -8,6 +8,7 @@
 #include <Eigen/Cholesky>
 #include <Eigen/LU>
 
+
 namespace cppoptlib {
 
 
@@ -22,6 +23,8 @@ namespace cppoptlib {
     using TSetMatrix  = Eigen::Matrix<Scalar, Dim, SetSize>;
     using TSquareSetMatrix  = Eigen::Matrix<Scalar, SetSize, SetSize>;
     using TFlattenedSquareMatrix = Eigen::Matrix<Scalar, SetSize*SetSize, 1>;
+
+    SmallestVectorInConvexHullFinder(){};
 
     //TODO find a more efficient way
     void resizeFinder(const long int newDim, const long int newSetSize){
@@ -49,7 +52,9 @@ namespace cppoptlib {
 
     /* Computing shortest l2-norm vector in convex hull of cached gradients:
      */
-    std::pair<TSetVector,TVector> findSmallestVectorInConvexHull(const TSetMatrix &G) {
+    std::pair<TSetVector,TVector> findSmallestVectorInConvexHull(const TSetMatrix &G,
+                                                                 const Scalar &muTolerance,
+                                                                 const Scalar &residualNormTolerance) {
       // x: primal variables
       // y: dual lagrange mutlipliers
       // z: dual slack variables
@@ -63,19 +68,15 @@ namespace cppoptlib {
       y = static_cast<Scalar>(0.0);
 
       //Parameters
-      const Scalar mu0 = x.transpose().dot(z) / static_cast<Scalar>(SetSize);
-      //TODO: why not : //const Scalar mu0 = 1.0 // equivalent?
-      const Scalar muTolerance = 1e-5;
-      const Scalar residualNormTolerance = 1e-5;
+      const Scalar mu0 = x.transpose().dot(z) / static_cast<Scalar>(G.cols()); // like this  mu0 = 1, in the original
+      // implementation, x can be specified and its default is {1,...,1}
       const Scalar stepSizeDamping = 0.9995;
       int deltaSigmaHeuristic = 3;
 
       Q = G.transpose() * G;
 
-      const Scalar infinityNormedQ = Q.cwiseAbs().rowwise().sum().maxCoeff() + static_cast<Scalar>(2.0);
-
-
       const Scalar muStoppingConstant = muTolerance * mu0;
+      const Scalar infinityNormedQ = Q.cwiseAbs().rowwise().sum().maxCoeff() + static_cast<Scalar>(2.0);
       const Scalar residualStoppingConstant = residualNormTolerance * infinityNormedQ;
 
 
@@ -144,8 +145,8 @@ namespace cppoptlib {
       };
 
       //TODO - use log from cppoptlib
-      //if (k >= maxit) std::cout << "convex hull max it reached" << std::endl;
-      //else std::cout << "optimal convex hull vector found after " << k << " iterations"  << std::endl;
+      if (k >= maxit) std::cout << "convex hull max it reached" << std::endl;
+      else std::cout << "optimal convex hull vector found after " << k << " iterations"  << std::endl;
 
       replaceNegativeElementsByZero(x);// Project x onto R+
 
@@ -160,8 +161,6 @@ namespace cppoptlib {
     Scalar calculateStepSize(const TSetVector &v) {
       // find element the smallest positive element of v or choose one
       Scalar min = std::numeric_limits<Scalar>::max();;
-      //if( v[0] < 0 ) min = std::numeric_limits<Scalar>::max();
-      //else min = v[0];
       for (int i = 0; i < v.size(); ++i) {
         if ((v[i] < min) && (v[i] > static_cast<Scalar>(0.0))) min = v[i];
       }
@@ -190,13 +189,13 @@ namespace cppoptlib {
     };
 
   private:
+
     Scalar r2, rs, mu, muaff, ap, ad, sig, r5, r6, M, dy,\
       y, q;
     TSetVector r1, r3, r4, r7, zdx, KT, dx,  dz,\
       e,x,z;
 
     Eigen::Matrix<Scalar, Eigen::Dynamic, 1> tempVec;
-
     TVector d;
 
     TSquareSetMatrix C, Q, QD;

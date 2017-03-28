@@ -4,6 +4,9 @@
 
 #include <gmock/gmock.h>
 #include "bfgsnssolver.h"
+#include "gradientdescentsolver.h"
+#include "gradientdescentnssolver.h"
+#include "gradientdescentsimplesolver.h"
 #include "TestProblems.cpp"
 
 using namespace testing;
@@ -34,7 +37,7 @@ TEST_F(ABfgsNsSolverTest, Absolute1D) {
   x << 3.0;
   AbsoluteProblem1D f;
 
-  cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::defaults();
+  cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::nonsmoothDefaults();
   crit.iterations = 100;
   cppoptlib::BfgsnsSolver<AbsoluteProblem1D> solver;
   solver.setDebug(cppoptlib::DebugLevel::High);
@@ -51,7 +54,7 @@ TEST_F(ABfgsNsSolverTest, Cusp1D) {
   x << 3.0;
   CuspProblem1D f;
 
-  cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::defaults();
+  cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::nonsmoothDefaults();
   crit.iterations = 100;
   cppoptlib::BfgsnsSolver<CuspProblem1D> solver;
   solver.setDebug(cppoptlib::DebugLevel::High);
@@ -68,7 +71,7 @@ TEST_F(ABfgsNsSolverTest, Cusp2D) {
   x << 3.0,3.0;
   CuspProblem2D f;
 
-  cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::defaults();
+  cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::nonsmoothDefaults();
   crit.iterations = 100;
   cppoptlib::BfgsnsSolver<CuspProblem2D> solver;
   solver.setDebug(cppoptlib::DebugLevel::High);
@@ -85,7 +88,7 @@ TEST_F(ABfgsNsSolverTest, Cusp3D) {
   x << 3.0,3.0,3.0;
   CuspProblem3D f;
 
-  cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::defaults();
+  cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::nonsmoothDefaults();
   crit.iterations = 100;
   cppoptlib::BfgsnsSolver<CuspProblem3D> solver;
   solver.setDebug(cppoptlib::DebugLevel::High);
@@ -102,7 +105,7 @@ TEST_F(ABfgsNsSolverTest, CuspXD) {
   x << 3.0,3.0,3.0;
   CuspProblemXD f;
 
-  cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::defaults();
+  cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::nonsmoothDefaults();
   crit.iterations = 100;
   cppoptlib::BfgsnsSolver<CuspProblemXD> solver;
   solver.setDebug(cppoptlib::DebugLevel::High);
@@ -119,13 +122,16 @@ TEST_F(ABfgsNsSolverTest, H2likeProblem) {
   x << 0.02,-0.5,1.0,0.0,+0.05,-2.0;
   H2likeProblem f;
 
-  cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::nonsmoothDefaults();
-  crit.iterations = 100;
-  //crit.xDelta = 1e-6;
-  crit.gradNorm = 1e-4;
-  cppoptlib::BfgsnsSolver<H2likeProblem> solver;
+  cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::defaults();
+  crit.iterations = 100000;
+  //crit.xDelta = 1e-7;
+  //cppoptlib::BfgsnsSolver<H2likeProblem> solver;
+  //cppoptlib::GradientDescentSolver<H2likeProblem> solver;
+  //cppoptlib::GradientDescentnsSolver<H2likeProblem> solver;
+  cppoptlib::GradientDescentSimpleSolver<H2likeProblem> solver;
+
   solver.setDebug(cppoptlib::DebugLevel::High);
-  //solver.setStopCriteria(crit);
+  solver.setStopCriteria(crit);
   solver.minimize(f, x);
 
   std::cout << "f in argmin " << f(x) << std::endl;
@@ -133,7 +139,7 @@ TEST_F(ABfgsNsSolverTest, H2likeProblem) {
   std::cout << "Final criteria values: " << std::endl << solver.criteria() << std::endl;
 
   Eigen::VectorXd xref(6);
-  xref << 0.0,0.0,-0.7,0.0,0.0,+0.7;
+  xref << 0.0,0.0,+0.7,0.0,0.0,-0.7;
   ASSERT_TRUE( (x-xref).norm() < 0.001);
 }
 

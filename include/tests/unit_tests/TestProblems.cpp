@@ -6,6 +6,7 @@
 
 #include <problem.h>
 #include <iomanip>
+#include <cmath>
 
 class Minimum2DProblem : public cppoptlib::Problem<double,Eigen::Dynamic> {
 public:
@@ -21,15 +22,6 @@ public:
   void hessian(const TVector &x, THessian &hessian) {
     hessian << 2,0,0,2;
   }
-
-  /*bool callback(const cppoptlib::Criteria<double> &state, const Eigen::VectorXd &x) {
-    std::cout << "(" << std::setw(2) << state.iterations << ")"
-              << " ||dx|| = " << std::fixed << std::setw(8) << std::setprecision(4) << state.gradNorm
-              << " ||x|| = "  << std::setw(6) << x.norm()
-              << " f(x) = "   << std::setw(8) << value(x)
-              << " x = [" << std::setprecision(16) << x.transpose() << "]" << std::endl;
-    return true;
-  }*/
 };
 
 class SaddlePointProblem : public cppoptlib::Problem<double,Eigen::Dynamic> {
@@ -51,7 +43,7 @@ public:
 class AbsoluteProblem1D : public cppoptlib::Problem<double,Eigen::Dynamic> {
 public:
   double value(const Eigen::VectorXd &x) {
-    return abs(x(0));
+    return std::abs(x(0));
   }
 
   void gradient(const Eigen::VectorXd &x, Eigen::VectorXd &grad) {
@@ -75,24 +67,24 @@ public:
 class CuspProblem1D : public cppoptlib::Problem<double,Eigen::Dynamic> {
 public:
   double value(const Eigen::VectorXd &x) {
-    return -exp(-abs(x(0)));
+    return -std::exp(-std::abs(x(0)));
   }
 
   void gradient(const Eigen::VectorXd &x, Eigen::VectorXd &grad) {
-    if(x(0)>=0) grad(0) = +exp(-abs(x(0)));
-    else        grad(0) = -exp(-abs(x(0)));
+    if(x(0)>=0) grad(0) = +std::exp(-std::abs(x(0)));
+    else        grad(0) = -std::exp(-std::abs(x(0)));
   }
 };
 
 class CuspProblem2D : public cppoptlib::Problem<double,Eigen::Dynamic> {
 public:
   double value(const Eigen::VectorXd &x) {
-    return -exp(-abs(x(0))) + x(1)*x(1);
+    return -std::exp(-std::abs(x(0))) + x(1)*x(1);
   }
 
   void gradient(const Eigen::VectorXd &x, Eigen::VectorXd &grad) {
-    if(x(0)>=0) grad(0) = +exp(-abs(x(0)));
-    else        grad(0) = -exp(-abs(x(0)));
+    if(x(0)>=0) grad(0) = +std::exp(-std::abs(x(0)));
+    else        grad(0) = -std::exp(-std::abs(x(0)));
     grad(1) = 2*x(1);
   }
 };
@@ -100,12 +92,12 @@ public:
 class CuspProblem3D : public cppoptlib::Problem<double,Eigen::Dynamic> {
 public:
   double value(const Eigen::VectorXd &x) {
-    return -exp(-abs(x(0))) + x(1)*x(1) + x(2)*x(2);
+    return -std::exp(-std::abs(x(0))) + x(1)*x(1) + x(2)*x(2);
   }
 
   void gradient(const Eigen::VectorXd &x, Eigen::VectorXd &grad) {
-    if(x(0)>=0) grad(0) = +exp(-abs(x(0)));
-    else        grad(0) = -exp(-abs(x(0)));
+    if(x(0)>=0) grad(0) = +std::exp(-std::abs(x(0)));
+    else        grad(0) = -std::exp(-std::abs(x(0)));
     grad(1) = 2*x(1);
     grad(2) = 2*x(2);
   }
@@ -114,7 +106,7 @@ public:
 class CuspProblemXD : public cppoptlib::Problem<double,Eigen::Dynamic> {
 public:
   double value(const Eigen::VectorXd &x) {
-    return -exp(-x.norm());
+    return -std::exp(-x.norm());
   }
 };
 
@@ -123,7 +115,7 @@ public:
   Eigen::Vector3d shift = Eigen::Vector3d(0.0,0.0,0.7);
 
   double value(const Eigen::VectorXd &x) {
-    return -( exp(-(x.head(3)-shift).norm())+ exp(-(x.tail(3)+shift).norm()) );
+    return -( std::exp(-(x.head(3)-shift).norm())+ std::exp(-(x.tail(3)+shift).norm()) );
   }
   bool callback(const cppoptlib::Criteria<double> &state, const Eigen::VectorXd &x) {
     std::cout << "(" << std::setw(2) << state.iterations << ")"
@@ -142,7 +134,7 @@ public:
   using typename cppoptlib::Problem<double>::TVector;
 
   double value(const TVector &x) {
-    return   0.25*(x[0] -1)*(x[0] -1) + abs(x[1] - 2*x[0]*x[0] + 1);
+    return   0.25*(x[0] -1)*(x[0] -1) + std::abs(x[1] - 2*x[0]*x[0] + 1);
   }
 };
 
