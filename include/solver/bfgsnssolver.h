@@ -32,12 +32,12 @@ namespace cppoptlib {
       TVector grad(DIM);
       objFunc.gradient(x0, grad);
 
-      MatrixType gradientSet = MatrixType::Zero(DIM,MaxIt);
-      gradientSet.col(0) = grad;
-
       TVector x_old = x0;
 
       // members for nonsmooth opt
+      MatrixType gradientSet = MatrixType::Zero(DIM,MaxIt);
+      gradientSet.col(0) = grad;
+
       const int J = 50; // J = 1 reduces to the usual stopping condition, when f is smooth
       Eigen::Matrix<Scalar, Eigen::Dynamic, 1> j(MaxIt,1);
       j(0) = 1;
@@ -46,6 +46,7 @@ namespace cppoptlib {
       this->m_current.reset();
       do {
         k = this->m_current.iterations;
+
         TVector searchDir = -1 * H * grad;
         // check "positive definite"
         Scalar phi = grad.dot(searchDir);
@@ -111,7 +112,8 @@ namespace cppoptlib {
 
 
         ++this->m_current.iterations;
-        this->m_current.gradNorm = grad.norm(); //TODO calculate gradient norm only for smooth variables?
+        this->m_current.gradNorm = grad.template lpNorm<Eigen::Infinity>();
+        // std::cout << "iter: "<<iter<< " f = " <<  objFunc.value(x0) << " ||g||_inf "<<gradNorm   << std::endl;
         this->m_status = checkConvergence(this->m_stop, this->m_current);
       } while (objFunc.callback(this->m_current, x0) && (this->m_status == Status::Continue));
     }
