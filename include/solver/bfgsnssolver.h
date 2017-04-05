@@ -59,9 +59,9 @@ namespace cppoptlib {
         }
 
         // do step
-        const Scalar stepLength = ArmijoWolfe<ProblemType, 1>::linesearch(x0, searchDir, objFunc);
-        TVector step = stepLength * searchDir;
-        x0 = x0 + step;
+        const Scalar rate = ArmijoWolfe<ProblemType, 1>::linesearch(x0, searchDir, objFunc);
+        TVector s = rate * searchDir;
+        x0 = x0 + s;
         this->m_current.xDelta = (x_old - x0).norm();
 
 
@@ -106,9 +106,9 @@ namespace cppoptlib {
         // update the hessian, based on the current gradient (that can be the result of the convex hull search in the
         // gradient set) to prepare for the next iteration step
         TVector y = grad - grad_old;
-        const Scalar rho = 1.0 / y.dot(step);
-        H = H - rho * (step * (y.transpose() * H) + (H * y) * step.transpose())
-            + rho * rho * (y.dot(H * y) + 1.0 / rho) * (step * step.transpose());
+        const Scalar rho = 1.0 / y.dot(s);
+        H = H - rho * (s * (y.transpose() * H) + (H * y) * s.transpose())
+            + rho * rho * (y.dot(H * y) + 1.0 / rho) * (s * s.transpose());
 
 
         ++this->m_current.iterations;
