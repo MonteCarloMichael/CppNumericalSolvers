@@ -45,8 +45,8 @@ class BfgsSolver : public ISolver<ProblemType, 1> {
             TVector y = grad - grad_old;
 
             const Scalar rho = 1.0 / y.dot(s);
-            H = H - rho * (s * (y.transpose() * H) + (H * y) * s.transpose()) + rho * rho * (y.dot(H * y) + 1.0 / rho)
-                * (s * s.transpose());
+            H = H - rho * (s * (y.transpose() * H) + (H * y) * s.transpose())
+                + rho * rho * (y.dot(H * y) + 1.0 / rho) * (s * s.transpose());
             // std::cout << "iter: "<<iter<< " f = " <<  objFunc.value(x0) << " ||g||_inf "<<gradNorm   << std::endl;
 
             if( (x_old-x0).template lpNorm<Eigen::Infinity>() < 1e-7  )

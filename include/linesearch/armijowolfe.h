@@ -52,9 +52,9 @@ namespace cppoptlib {
       const Scalar searchDirNorm = searchDir.norm();
 
       const int nbisectmax = std::max(30, static_cast<int>(std::round(std::log2(1e5 * searchDirNorm))));
-      //more iterations if ||d|| is big
+      //more bisections if ||d|| is big
       const int nexpandmax = std::max(10, static_cast<int>(std::round(std::log2(1e5 / searchDirNorm))));
-      //more iterations if ||d|| small
+      //more expansions if ||d|| is small
       int nbisect = 0;
       int nexpand = 0;
 
