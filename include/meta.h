@@ -74,7 +74,8 @@ public:
     T fDelta;          //!< Minimum change in cost function
     T gradNorm;        //!< Minimum norm of gradient vector
     T condition;       //!< Maximum condition number of Hessian
-
+    T xDeltaNonsmooth;
+    T rsDeltaNonsmooth;
     Criteria() {
         reset();
     }
@@ -86,16 +87,20 @@ public:
         d.fDelta = 0;
         d.gradNorm = 1e-4;
         d.condition = 0;
+        d.xDeltaNonsmooth = 0;
+        d.rsDeltaNonsmooth = 0;
         return d;
     }
 
     static Criteria nonsmoothDefaults() {
       Criteria d;
       d.iterations = 10000;
-      d.xDelta = 1e-4;
+      d.xDelta = 0;
       d.fDelta = 0;
-      d.gradNorm = 1e-4;
+      d.gradNorm = 1;//1e-4;
       d.condition = 0;
+      d.xDeltaNonsmooth = 1e-6;
+      d.rsDeltaNonsmooth = 1e-6;
       return d;
     }
 
@@ -105,6 +110,8 @@ public:
         fDelta = 0;
         gradNorm = 0;
         condition = 0;
+        xDeltaNonsmooth = 0;
+        rsDeltaNonsmooth = 0;
     }
 
     void print(std::ostream &os) const {

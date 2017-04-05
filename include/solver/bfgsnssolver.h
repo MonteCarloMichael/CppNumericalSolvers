@@ -3,6 +3,7 @@
 // Created by Michael Heuer on 06.02.17.
 //
 #include <iostream>
+#include <Eigen/Dense>
 #include "isolver.h"
 #include "../linesearch/armijowolfe.h"
 #include "../linesearch/smallestvectorinconvexhullfinder.h"
@@ -74,7 +75,7 @@ namespace cppoptlib {
 
         // if the current difference in the parameter vector is 10 times as large as the stop criterion, store only
         // the current gradient to do a normal BFGS step
-        if ( this->m_current.xDelta > this->m_stop.xDelta *10 ){
+        if ( this->m_current.xDelta > this->m_stop.xDeltaNonsmooth *10 ){
           j(k) = 1;
           gradientSetSelection.resize(DIM,1);
           gradientSetSelection.col(0) = grad;
@@ -98,7 +99,9 @@ namespace cppoptlib {
         if( j(k) > 1 ) {
           SmallestVectorInConvexHullFinder<Scalar> finder;
           finder.resizeFinder(DIM, gradientSetSelection.rows());
-          grad = finder.findSmallestVectorInConvexHull(gradientSetSelection,this->m_stop.xDelta,this->m_stop.xDelta).second;
+          grad = finder.findSmallestVectorInConvexHull(gradientSetSelection,
+                                                       this->m_stop.xDeltaNonsmooth,
+                                                       this->m_stop.rsDeltaNonsmooth).second;
         }
 
         x_old = x0;
