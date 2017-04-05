@@ -49,12 +49,10 @@ namespace cppoptlib {
         k = this->m_current.iterations;
 
         TVector searchDir = -1 * H * grad;
-        // check "positive definite"
-        Scalar phi = grad.dot(searchDir);
-
-        // Check if search direction is a descent direction
-        if (phi > 0) {
-          // no, we reset the hessian approximation
+        // check for positive definiteness
+        Eigen::LLT<THessian ,Eigen::UpLoType::Lower> choleskyDecomposer(H);
+        if ( choleskyDecomposer.info() == Eigen::NumericalIssue ){
+          //std::cout << "Hessian not positive definite" << std::endl;
           H = THessian::Identity(DIM, DIM);
           searchDir = -grad;
         }
