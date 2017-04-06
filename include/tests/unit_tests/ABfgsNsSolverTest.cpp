@@ -124,11 +124,7 @@ TEST_F(ABfgsNsSolverTest, H2likeProblem) {
 
   cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::defaults();
   crit.iterations = 100000;
-  //crit.xDelta = 1e-7;
-  //cppoptlib::BfgsnsSolver<H2likeProblem> solver;
-  //cppoptlib::GradientDescentSolver<H2likeProblem> solver;
-  //cppoptlib::GradientDescentnsSolver<H2likeProblem> solver;
-  cppoptlib::GradientDescentSimpleSolver<H2likeProblem> solver;
+  cppoptlib::BfgsnsSolver<H2likeProblem> solver;
 
   solver.setDebug(cppoptlib::DebugLevel::High);
   solver.setStopCriteria(crit);
