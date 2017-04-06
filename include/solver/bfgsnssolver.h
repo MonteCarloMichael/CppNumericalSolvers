@@ -3,6 +3,7 @@
 // Created by Michael Heuer on 06.02.17.
 //
 #include <iostream>
+#include <Eigen/Dense>
 #include "isolver.h"
 #include "../linesearch/armijowolfe.h"
 #include "../linesearch/smallestvectorinconvexhullfinder.h"
@@ -48,12 +49,10 @@ namespace cppoptlib {
         k = this->m_current.iterations;
 
         TVector searchDir = -1 * H * grad;
-        // check "positive definite"
-        Scalar phi = grad.dot(searchDir);
-
-        // Check if search direction is a descent direction
-        if (phi > 0) {
-          // no, we reset the hessian approximation
+        // check for positive definiteness
+        Eigen::LLT<THessian ,Eigen::UpLoType::Lower> choleskyDecomposer(H);
+        if ( choleskyDecomposer.info() == Eigen::NumericalIssue ){
+          //std::cout << "Hessian not positive definite" << std::endl;
           H = THessian::Identity(DIM, DIM);
           searchDir = -grad;
         }
@@ -74,7 +73,7 @@ namespace cppoptlib {
 
         // if the current difference in the parameter vector is 10 times as large as the stop criterion, store only
         // the current gradient to do a normal BFGS step
-        if ( this->m_current.xDelta > this->m_stop.xDelta *10 ){
+        if ( this->m_current.xDelta > this->m_stop.xDeltaNonsmooth *10 ){
           j(k) = 1;
           gradientSetSelection.resize(DIM,1);
           gradientSetSelection.col(0) = grad;
@@ -98,7 +97,9 @@ namespace cppoptlib {
         if( j(k) > 1 ) {
           SmallestVectorInConvexHullFinder<Scalar> finder;
           finder.resizeFinder(DIM, gradientSetSelection.rows());
-          grad = finder.findSmallestVectorInConvexHull(gradientSetSelection,this->m_stop.xDelta,this->m_stop.xDelta).second;
+          grad = finder.findSmallestVectorInConvexHull(gradientSetSelection,
+                                                       this->m_stop.xDeltaNonsmooth,
+                                                       this->m_stop.rsDeltaNonsmooth).second;
         }
 
         x_old = x0;
