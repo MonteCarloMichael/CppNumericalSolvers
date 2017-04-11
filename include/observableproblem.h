@@ -9,28 +9,30 @@
 #include <iostream>
 #include "problemobserver.h"
 
-class ObservableProblem{
-public:
-    void addObserver(ProblemObserver *observer) {
-        std::cout << "Obersver added: " << observer << std::endl;
-        observers_.push_back(observer);
-    }
+namespace cppoptlib {
+    class ObservableProblem {
+    public:
+        void addObserver(ProblemObserver *observer) {
+            std::cout << "Obersver added: " << observer << std::endl;
+            observers_.push_back(observer);
+        }
 
-    void removeObserver(ProblemObserver *observer) {
-        observers_.erase(std::remove(observers_.begin(), observers_.end(), observer), observers_.end());
-    }
+        void removeObserver(ProblemObserver *observer) {
+            observers_.erase(std::remove(observers_.begin(), observers_.end(), observer), observers_.end());
+        }
 
-    void notifyObserversAboutPerformedStep() {
-        std::cout << "step performed" << std::endl;
-        for (auto &observer: observers_) observer->stepPerformed();
-    }
+        void notifyObserversAboutPerformedStep() {
+            std::cout << "step performed" << std::endl;
+            for (auto &observer: observers_) observer->stepPerformed();
+        }
 
-    unsigned long getObserverCount(){
-        return observers_.size();
-    }
+        unsigned long getObserverCount() {
+            return observers_.size();
+        }
 
-private:
-    std::vector<ProblemObserver*> observers_;
-};
+    private:
+        std::vector<ProblemObserver *> observers_;
+    };
+}
 
 #endif //OBSERVABLEPROBLEM_H
