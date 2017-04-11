@@ -6,6 +6,7 @@
 #include <Eigen/Core>
 
 #include "meta.h"
+#include "solver/isolver.h"
 
 namespace cppoptlib {
 
@@ -33,6 +34,11 @@ class Problem {
   virtual bool detailed_callback(const Criteria<Scalar> &state, SimplexOp op, int index, const MatrixType &x, std::vector<Scalar> f) {
     return true;
   }
+
+  virtual bool solver_reference_callback(const ISolver<Problem<Scalar, Dim>,1> &solver) {
+    return true;
+  }
+
 #pragma GCC diagnostic pop
 
   /**

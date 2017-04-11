@@ -43,6 +43,8 @@ set(HEADER_FILES
         include/solver/bfgsnssolver.h
         include/linesearch/armijowolfe.h
         include/linesearch/smallestvectorinconvexhullfinder.h
+        include/problemobserver.h
+        include/observableproblem.h
         )
 
 add_library(${PROJECT_NAME} STATIC ${HEADER_FILES} dummy.cpp)
