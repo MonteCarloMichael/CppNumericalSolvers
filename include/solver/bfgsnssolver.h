@@ -73,7 +73,7 @@ namespace cppoptlib {
 
         // if the current difference in the parameter vector is 10 times as large as the stop criterion, store only
         // the current gradient to do a normal BFGS step
-        if ( this->m_current.xDelta > this->m_stop.xDeltaNonsmooth *10 ){
+        if ( this->m_current.xDelta > this->m_stop.xDeltaNonsmooth *10 || k == 0){
           j(k) = 1;
           gradientSetSelection.resize(DIM,1);
           gradientSetSelection.col(0) = grad;
