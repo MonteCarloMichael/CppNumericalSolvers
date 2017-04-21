@@ -35,10 +35,6 @@ class Problem {
     return true;
   }
 
-  virtual bool solver_reference_callback(const ISolver<Problem<Scalar, Dim>,1> &solver) {
-    return true;
-  }
-
 #pragma GCC diagnostic pop
 
   /**
