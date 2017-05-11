@@ -199,7 +199,8 @@ namespace cppoptlib {
     TVector d;
 
     TSquareSetMatrix C, Q, QD;
-    Eigen::LLT<TSquareSetMatrix,Eigen::UpLoType::Lower> llt;// workaround since Eigen::UpLoType::Upper=0x2 does not work
+    Eigen::LLT<TSquareSetMatrix,0x2> llt;// workaround since Eigen::UpLoType::Upper=0x2 does not work
+    //Eigen::LLT<TSquareSetMatrix,Eigen::UpLoType::Lower> llt;
     Eigen::FullPivLU<TSquareSetMatrix> lu;
   };
 

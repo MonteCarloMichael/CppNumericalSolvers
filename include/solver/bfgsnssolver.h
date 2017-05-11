@@ -50,7 +50,8 @@ namespace cppoptlib {
 
         TVector searchDir = -1 * H * grad;
         // check for positive definiteness
-        Eigen::LLT<THessian ,Eigen::UpLoType::Lower> choleskyDecomposer(H);
+        Eigen::LLT<THessian, 0x2> choleskyDecomposer(H);
+        //Eigen::LLT<THessian, Eigen::UpLoType::Lower> choleskyDecomposer(H);
         if ( choleskyDecomposer.info() == Eigen::NumericalIssue ){
           //std::cout << "Hessian not positive definite" << std::endl;
           H = THessian::Identity(DIM, DIM);

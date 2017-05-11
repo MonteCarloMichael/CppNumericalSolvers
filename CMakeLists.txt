@@ -12,6 +12,9 @@ message ( "-- ++ CREATING PROJECT OR MAKEFILE ---> ${OUTPUT_NAME}" )
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_FLAGS "-g -Wall")
 
+find_package(Eigen3 REQUIRED)
+include_directories( ${EIGEN3_INCLUDE_DIR} )
+
 include_directories(
         include
         include/linesearch
@@ -49,7 +52,7 @@ set(HEADER_FILES
 
 add_library(${PROJECT_NAME} STATIC ${HEADER_FILES} dummy.cpp)
 target_link_libraries(${PROJECT_NAME}
-        eigen
+        #eigen
         )
 target_include_directories(${PROJECT_NAME} PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
