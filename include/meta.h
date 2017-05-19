@@ -97,7 +97,7 @@ public:
       d.iterations = 10000;
       d.xDelta = 0;
       d.fDelta = 0;
-      d.gradNorm = 1;//1e-4;
+      d.gradNorm = 1e-4;
       d.condition = 0;
       d.xDeltaNonsmooth = 1e-6;
       d.rsDeltaNonsmooth = 1e-6;

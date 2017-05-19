@@ -39,6 +39,7 @@ TEST_F(ABfgsNsSolverTest, Absolute1D) {
 
   cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::nonsmoothDefaults();
   crit.iterations = 100;
+  crit.gradNorm = 1e-4;
   cppoptlib::BfgsnsSolver<AbsoluteProblem1D> solver;
   solver.setDebug(cppoptlib::DebugLevel::High);
   solver.setStopCriteria(crit);
@@ -56,6 +57,7 @@ TEST_F(ABfgsNsSolverTest, Cusp1D) {
 
   cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::nonsmoothDefaults();
   crit.iterations = 100;
+  crit.gradNorm = 1e-4;
   cppoptlib::BfgsnsSolver<CuspProblem1D> solver;
   solver.setDebug(cppoptlib::DebugLevel::High);
   solver.setStopCriteria(crit);
@@ -73,6 +75,7 @@ TEST_F(ABfgsNsSolverTest, Cusp2D) {
 
   cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::nonsmoothDefaults();
   crit.iterations = 100;
+  crit.gradNorm = 1e-4;
   cppoptlib::BfgsnsSolver<CuspProblem2D> solver;
   solver.setDebug(cppoptlib::DebugLevel::High);
   solver.setStopCriteria(crit);
@@ -90,6 +93,7 @@ TEST_F(ABfgsNsSolverTest, Cusp3D) {
 
   cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::nonsmoothDefaults();
   crit.iterations = 100;
+  crit.gradNorm = 1e-4;
   cppoptlib::BfgsnsSolver<CuspProblem3D> solver;
   solver.setDebug(cppoptlib::DebugLevel::High);
   solver.setStopCriteria(crit);
@@ -107,6 +111,7 @@ TEST_F(ABfgsNsSolverTest, CuspXD) {
 
   cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::nonsmoothDefaults();
   crit.iterations = 100;
+  crit.gradNorm = 1e-4;
   cppoptlib::BfgsnsSolver<CuspProblemXD> solver;
   solver.setDebug(cppoptlib::DebugLevel::High);
   solver.setStopCriteria(crit);
@@ -123,7 +128,8 @@ TEST_F(ABfgsNsSolverTest, H2likeProblem) {
   H2likeProblem f;
 
   cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::defaults();
-  crit.iterations = 100000;
+  crit.iterations = 1000;
+  crit.gradNorm = 1e-4;
   cppoptlib::BfgsnsSolver<H2likeProblem> solver;
 
   solver.setDebug(cppoptlib::DebugLevel::High);

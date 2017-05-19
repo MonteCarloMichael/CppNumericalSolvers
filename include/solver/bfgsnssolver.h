@@ -2,14 +2,16 @@
 //
 // Created by Michael Heuer on 06.02.17.
 //
+
+#ifndef BFGSNSSOLVER_H_
+#define BFGSNSSOLVER_H_
+
 #include <iostream>
 #include <Eigen/Dense>
 #include "isolver.h"
 #include "../linesearch/armijowolfe.h"
 #include "../linesearch/smallestvectorinconvexhullfinder.h"
-
-#ifndef BFGSNSSOLVER_H_
-#define BFGSNSSOLVER_H_
+#include "timeintegration/rungekuttafourthorder.h"
 
 namespace cppoptlib {
 
