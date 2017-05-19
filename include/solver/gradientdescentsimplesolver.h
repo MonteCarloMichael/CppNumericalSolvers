@@ -25,14 +25,19 @@ public:
   void minimize(ProblemType &objFunc, TVector &x0) {
 
     TVector direction(x0.rows());
+    TVector x_old(x0.rows());
     this->m_current.reset();
+
+    objFunc.gradient(x0, direction);
     do {
-      ;
-      objFunc.gradient(x0, direction);
+
       const Scalar rate = 1e-4;
+      x_old = x0;
       x0 = x0 - rate * direction;
+      objFunc.gradient(x0, direction);
+
+      this->m_current.xDelta = (x_old-x0).template lpNorm<Eigen::Infinity>();
       this->m_current.gradNorm = direction.template lpNorm<Eigen::Infinity>();
-      // std::cout << "iter: "<<iter<< " f = " <<  objFunc.value(x0) << " ||g||_inf "<<gradNorm  << std::endl;
       ++this->m_current.iterations;
       this->m_status = checkConvergence(this->m_stop, this->m_current);
     } while (objFunc.callback(this->m_current, x0) && (this->m_status == Status::Continue));
