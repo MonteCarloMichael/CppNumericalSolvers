@@ -44,10 +44,14 @@ set(HEADER_FILES
         include/solver/newtondescentsolver.h
         include/solver/newtonraphsonsolver.h
         include/solver/bfgsnssolver.h
+        include/timeintegration/rungekuttafourthorder.h
         include/linesearch/armijowolfe.h
         include/linesearch/smallestvectorinconvexhullfinder.h
         include/problemobserver.h
         include/observableproblem.h
+        include/solver/timeintegrationsolver.h
+        include/timeintegration/velocityverlet.h
+        include/timeintegration/firealgorithm.h
         )
 
 add_library(${PROJECT_NAME} STATIC ${HEADER_FILES} dummy.cpp)
