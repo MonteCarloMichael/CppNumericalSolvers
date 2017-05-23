@@ -13,6 +13,7 @@
 #include "lbfgsbsolver.h"
 #include "cmaessolver.h"
 #include "neldermeadsolver.h"
+#include "timeintegrationsolver.h"
 #define PRECISION 1e-2
 #define PI 3.14159265358979323846
 using namespace cppoptlib;
@@ -198,6 +199,7 @@ BENCHSOVLER(LbfgsSolver)
 BENCHSOVLER(LbfgsbSolver)
 BENCHSOVLER(CMAesSolver)
 BENCHSOVLER(NelderMeadSolver)
+BENCHSOVLER(TimeIntegrationSolver)
 
 
 int main (int argc, char **argv) {

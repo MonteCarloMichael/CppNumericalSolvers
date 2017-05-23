@@ -8,6 +8,7 @@
 #include <Eigen/Core>
 #include "isolver.h"
 #include "../timeintegration/firealgorithm.h"
+#include "../timeintegration/velocityverlet.h"
 
 namespace cppoptlib {
 
@@ -56,6 +57,7 @@ namespace cppoptlib {
 
     private:
         FIREAlgorithm<ProblemType> fireAlgorithm;
+        VelocityVerlet<ProblemType> velocityVerlet;
     };
 
 } /* namespace cppoptlib */

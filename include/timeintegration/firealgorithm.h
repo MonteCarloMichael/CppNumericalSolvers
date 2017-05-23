@@ -16,7 +16,7 @@ namespace cppoptlib {
         using TVector = typename ProblemType::TVector;
 
         FIREAlgorithm()
-                :timeDelta_(0.1),
+                :timeDelta_(0.01),
                  timeDeltaMax_(timeDelta_*10),
                  nMin_(5),
                  fInc_(1.1),
@@ -35,7 +35,11 @@ namespace cppoptlib {
           objFunc.gradient(x, grad);
 
           // on first step, gradOld is not empty
-          if(gradOld_.size() == 0 ) gradOld_ = grad;
+          if(gradOld_.size() == 0 ) {
+            gradOld_ = grad;
+            //gradOld_ = Eigen::VectorXd::Zero(grad.size());
+          } 
+
 
           // Velocity Verlet step 3 (calculate velocities)
           TVector velocity = (gradOld_ + grad) * (-0.5 * timeDelta_);
