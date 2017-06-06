@@ -28,7 +28,7 @@ TEST_F(ANewtonRaphsonSolverTest, Minimum) {
 
 TEST_F(ANewtonRaphsonSolverTest, SaddlePoint) {
   Eigen::VectorXd  x(2);
-  x << 0.3, 0.3;
+  x << 1, 1;
   SaddlePointProblem f;
 
   cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::defaults();
