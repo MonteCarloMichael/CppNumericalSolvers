@@ -27,10 +27,10 @@ namespace cppoptlib {
       do {
         objFunc.gradient(x0, grad);
         objFunc.hessian(x0, hessian);
-        TVector delta_x = hessian.lu().solve(-grad);
+        TVector delta_x = hessian.fullPivLu().solve(-grad);
         x0 = x0 + delta_x;
         ++this->m_current.iterations;
-        this->m_current.xDelta = delta_x.norm();
+        this->m_current.xDelta = delta_x.template lpNorm<Eigen::Infinity>();
         this->m_current.gradNorm = grad.template lpNorm<Eigen::Infinity>();
         this->m_status = checkConvergence(this->m_stop, this->m_current);
       } while (objFunc.callback(this->m_current, x0) && (this->m_status == Status::Continue));
