@@ -70,7 +70,7 @@ class Problem {
    * @details should be overwritten by symbolic hessian, if solver relies on hessian
    */
   virtual void hessian(const TVector &x, THessian &hessian) {
-    finiteHessian(x, hessian);
+    semifiniteHessian(x, hessian);
   }
 
   virtual bool checkGradient(const TVector &x, int accuracy = 3) {
@@ -135,6 +135,59 @@ class Problem {
         xx[d] = tmp;
       }
       grad[d] /= ddVal;
+    }
+  }
+
+  void semifiniteHessian(const TVector &x, THessian &hessian, int accuracy = 3){
+    //const Scalar eps = 2.2204e-6;
+    const Scalar eps = std::numeric_limits<Scalar>::epsilon();
+
+    const TIndex D = x.rows();
+    static const std::array<std::vector<Scalar>, 4> coeff =
+            { { {1, -1}, {1, -8, 8, -1}, {-1, 9, -45, 45, -9, 1}, {3, -32, 168, -672, 672, -168, 32, -3} } };
+    static const std::array<std::vector<Scalar>, 4> coeff2 =
+            { { {1, -1}, {-2, -1, 1, 2}, {-3, -2, -1, 1, 2, 3}, {-4, -3, -2, -1, 1, 2, 3, 4} } };
+    static const std::array<Scalar, 4> dd = {2, 12, 60, 840};
+
+    TVector& xx = const_cast<TVector&>(x);
+    const int innerSteps = 2*(accuracy+1);
+
+    TVector grad(D);
+    TVector gradxx(D);
+    gradient(x,grad);
+
+    hessian.resize(D,D);
+
+    for (TIndex d = 0; d < D; d++) {
+
+      Scalar gradi = grad(d);
+      Scalar h = std::sqrt(eps) * (std::abs(gradi) + std::sqrt(eps)); // John C. Nash Compact Numerical Methods for Computers
+      for (TIndex i = 0; i < D; i++) {
+        hessian(d,i) = 0;
+
+        Scalar ddVal = dd[accuracy]*h;
+
+        for (int s = 0; s < innerSteps; ++s)
+        {
+          Scalar tmp = xx[i];
+          xx[i] += coeff2[accuracy][s]*h;
+          //std::cout << xx.transpose() << std::endl;
+
+          gradient(xx,gradxx);
+          hessian(d,i) += coeff[accuracy][s]*gradxx(d);
+          //std::cout << hess << std::endl;
+          xx[i] = tmp;
+        }
+        hessian(d,i) /= ddVal;
+      }
+    }
+
+    // symmetrize matrix by averaging the off-diagonal elements
+    for (TIndex i = 0; i < D; i++) {
+      for (TIndex j = i+1; j < D; j++) {
+        hessian(i,j) = (hessian(i,j)+hessian(j,i))/2.0;
+        hessian(j,i) = hessian(i,j);
+      }
     }
   }
 
