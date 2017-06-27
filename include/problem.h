@@ -111,7 +111,8 @@ class Problem {
 
   void finiteGradient(const  TVector &x, TVector &grad, int accuracy = 0) {
     // accuracy can be 0, 1, 2, 3
-    const Scalar eps = 2.2204e-6;
+    const Scalar eps = std::numeric_limits<Scalar>::epsilon();
+    const TIndex D = x.rows();
     static const std::array<std::vector<Scalar>, 4> coeff =
     { { {1, -1}, {1, -8, 8, -1}, {-1, 9, -45, 45, -9, 1}, {3, -32, 168, -672, 672, -168, 32, -3} } };
     static const std::array<std::vector<Scalar>, 4> coeff2 =
