@@ -37,8 +37,7 @@ namespace cppoptlib {
           // on first step, gradOld is not empty
           if(gradOld_.size() == 0 ) {
             gradOld_ = grad;
-            //gradOld_ = Eigen::VectorXd::Zero(grad.size());
-          } 
+          }
 
 
           // Velocity Verlet step 3 (calculate velocities)

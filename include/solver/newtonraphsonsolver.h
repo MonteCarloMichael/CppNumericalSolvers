@@ -1,7 +1,7 @@
 // CppNumericalSolver
 #ifndef NEWTONRAPHSONSOLVER_H_
 #define NEWTONRAPHSONSOLVER_H_
-#include <iostream>
+
 #include <Eigen/LU>
 #include "isolver.h"
 //#include "../linesearch/armijo.h"
