@@ -4,9 +4,7 @@
 
 #include <Eigen/LU>
 #include "isolver.h"
-//#include "../linesearch/armijo.h"
-
-
+#include "../linesearch/morethuente.h"
 
 namespace cppoptlib {
 
@@ -27,8 +25,12 @@ namespace cppoptlib {
       do {
         objFunc.gradient(x0, grad);
         objFunc.hessian(x0, hessian);
-        TVector delta_x = hessian.fullPivLu().solve(-grad);
+        TVector searchDir = hessian.fullPivLu().solve(-grad);
+
+        const Scalar rate = MoreThuente<ProblemType, 1>::linesearch(x0, searchDir, objFunc) ;
+        TVector delta_x = rate * searchDir;
         x0 = x0 + delta_x;
+
         ++this->m_current.iterations;
         this->m_current.xDelta = delta_x.template lpNorm<Eigen::Infinity>();
         this->m_current.gradNorm = grad.template lpNorm<Eigen::Infinity>();
