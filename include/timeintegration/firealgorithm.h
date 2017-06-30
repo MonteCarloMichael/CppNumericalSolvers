@@ -15,6 +15,8 @@ namespace cppoptlib {
         using Scalar = typename ProblemType::Scalar;
         using TVector = typename ProblemType::TVector;
 
+        /* this has to be called once before performStep() to initialize the class variables
+         * otherwise, the will not have the correct dimensionality due to the dynamic vector size*/
         FIREAlgorithm()
                 :timeDelta_(0.01),
                  timeDeltaMax_(timeDelta_*10),
@@ -28,27 +30,29 @@ namespace cppoptlib {
           latencyCount_= 0;
         };
 
+        void initialize(const TVector &x, ProblemType &objFunc) {
+          TVector gradient(x.rows());
+          objFunc.gradient(x, gradient);
+
+          gradientOld_ = gradient;
+          velocitiesOld_ = TVector::Zero(x.rows());
+        }
+
         TVector performStep(const TVector &x, ProblemType &objFunc) {
-          TVector grad(x.rows());
+          TVector gradient(x.rows());
 
           // Velocity Verlet step 2
-          objFunc.gradient(x, grad);
-
-          // on first step, gradOld is not empty
-          if(gradOld_.size() == 0 ) {
-            gradOld_ = grad;
-          }
-
+          objFunc.gradient(x, gradient);
 
           // Velocity Verlet step 3 (calculate velocities)
-          TVector velocity = (gradOld_ + grad) * (-0.5 * timeDelta_);
+          TVector velocities = velocitiesOld_ + (gradientOld_ + gradient) * (-0.5 * timeDelta_);
 
           // FIRE step 1
-          projection_ = grad.dot(velocity*(-1));
+          projection_ = gradient.dot(velocities * -1.0);
 
           // FIRE step 2
-          velocity = velocity * (1 - alpha_);
-          velocity += grad.normalized() * (-1.0 * velocity.norm() * alpha_);
+          velocities *= (1 - alpha_);
+          velocities += gradient.normalized() * (-1.0 * velocities.norm() * alpha_);
 
           // FIRE step 3
           ++latencyCount_; // increase counter for latency of the step size
@@ -61,19 +65,21 @@ namespace cppoptlib {
             // FIRE step 4
           else if (projection_ <= 0) { // going uphill
             timeDelta_ = timeDelta_ * fDec_;
-            velocity.setZero();
+            velocities.setZero();
             alpha_ = alphaStart_;
           }
           // prepare for next iteration
-          gradOld_ = grad;
+          gradientOld_ = gradient;
+          velocitiesOld_ = velocities;
 
           // Velocity Verlet step 1 (return shift)
-          return velocity * timeDelta_ + grad * (-0.5 * timeDelta_);
+          return velocities * timeDelta_ + gradient * (-0.5 * timeDelta_*timeDelta_);
         }
 
     private:
         Scalar timeDelta_;
-        TVector gradOld_;
+        TVector gradientOld_;
+        TVector velocitiesOld_;
 
         // FIRE variables
         unsigned latencyCount_;

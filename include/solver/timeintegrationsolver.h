@@ -25,6 +25,8 @@ namespace cppoptlib {
           TVector x_old(x0.rows());
           this->m_current.reset();
 
+          fireAlgorithm.initialize(x0, objFunc);
+
           objFunc.gradient(x0,grad);
           do {
             TVector s = fireAlgorithm.performStep(x0, objFunc);

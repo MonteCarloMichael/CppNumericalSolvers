@@ -16,30 +16,39 @@ namespace cppoptlib {
         using TVector = typename ProblemType::TVector;
 
         VelocityVerlet():
-                timeDelta_(0.1){};
+                timeDelta_(0.01){};
+
+        /* this has to be called once before performStep() to initialize the class variables
+         * otherwise, the will not have the correct dimensionality due to the dynamic vector size*/
+        void initialize(const TVector &x, ProblemType &objFunc) {
+          TVector gradient(x.rows());
+          objFunc.gradient(x, gradient);
+
+          gradientOld_ = gradient;
+          velocitiesOld_ = TVector::Zero(x.rows());
+        }
 
         TVector performStep(const TVector &x, ProblemType &objFunc) {
-          TVector grad(x.rows());
-
-          // on first step, gradOld is not empty
-          if(gradOld_.size() == 0 ) gradOld_ = grad;
+          TVector gradient(x.rows());
 
           // Velocity Verlet step 2
-          objFunc.gradient(x, grad);
+          objFunc.gradient(x, gradient);
 
           // Velocity Verlet step 3 (calculate velocities)
-          TVector velocity = (gradOld_ + grad) * (-0.5 * timeDelta_);
+          TVector velocities = velocitiesOld_ + (gradientOld_ + gradient) * (-0.5 * timeDelta_);
 
           // prepare for next iteration
-          gradOld_ = grad;
+          gradientOld_ = gradient;
+          velocitiesOld_ = velocities;
 
           // Velocity Verlet step 1 (return shift)
-          return velocity * timeDelta_ + grad * (-0.5 * timeDelta_);
+          return velocities * timeDelta_ + gradient * (-0.5 * timeDelta_*timeDelta_);
         }
 
     private:
         Scalar timeDelta_;
-        TVector gradOld_;
+        TVector gradientOld_;
+        TVector velocitiesOld_;
     };
 } /* namespace cppoptlib */
 
