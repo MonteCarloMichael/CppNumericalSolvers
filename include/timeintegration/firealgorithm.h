@@ -16,7 +16,7 @@ namespace cppoptlib {
         using TVector = typename ProblemType::TVector;
 
         /* this has to be called once before performStep() to initialize the class variables
-         * otherwise, the will not have the correct dimensionality due to the dynamic vector size*/
+         * otherwise, they will not have the correct dimensionality due to the dynamic vector size*/
         FIREAlgorithm()
                 :timeDelta_(0.01),
                  timeDeltaMax_(timeDelta_*10),

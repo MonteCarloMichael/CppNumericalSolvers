@@ -19,7 +19,7 @@ namespace cppoptlib {
                 timeDelta_(0.01){};
 
         /* this has to be called once before performStep() to initialize the class variables
-         * otherwise, the will not have the correct dimensionality due to the dynamic vector size*/
+         * otherwise, they will not have the correct dimensionality due to the dynamic vector size*/
         void initialize(const TVector &x, ProblemType &objFunc) {
           TVector gradient(x.rows());
           objFunc.gradient(x, gradient);
