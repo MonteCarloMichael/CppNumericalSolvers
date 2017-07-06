@@ -30,8 +30,9 @@ class NelderMeadSolver : public ISolver<ProblemType, 0> {
         if (r == c - 1) {
           if (x(r) == 0) {
             s(r, c) = 0.00025;
+          } else {
+            s(r, c) = (1 + 0.05) * x(r);
           }
-          s(r, c) = (1 + 0.05) * x(r);
         }
       }
     }
@@ -145,7 +146,7 @@ class NelderMeadSolver : public ISolver<ProblemType, 0> {
           f[index[DIM]] = f_r;
         }
       } else {
-        if ( f_r < f[index[DIM]] ) {
+        if ( f_r < f[index[DIM - 1]] ) {
           x0.col(index[DIM]) = x_r;
           f[index[DIM]] = f_r;
         } else {
