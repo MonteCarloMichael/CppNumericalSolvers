@@ -138,7 +138,65 @@ class Problem {
     }
   }
 
-  void semifiniteHessian(const TVector &x, THessian &hessian, int accuracy = 3){
+    void riddersFiniteGradient(const TVector &x, TVector &grad, int accuracy = 0) { //Numerical Recipes
+      const TIndex D = x.rows();
+      const Scalar eps = std::numeric_limits<Scalar>::epsilon();
+      Scalar err;
+      const int ntab = 10; //Sets maximum size of tableau.
+      const Scalar con = 1.4, con2 = (con * con); //Stepsize decreased by CON at each iteration.
+      const Scalar big = std::numeric_limits<Scalar>::max();
+      const Scalar safe = 2.0; //Return when error is SAFE worse than the
+      int i, j; //best so far.
+      Scalar errt = big, fac = 0, hh = 0, ans = 0;
+      Eigen::Matrix<Scalar,ntab, ntab> a;
+
+      TVector xiphh, ximhh;
+
+      finiteGradient(x,grad,0);
+      for (TIndex d = 0; d < x.rows(); d++) {
+        Scalar h = std::sqrt(eps) * (std::abs(grad(d)) + std::sqrt(eps));
+        // John C. Nash Compact Numerical Methods for Computers
+
+        assert(h != 0.0 && "h must be nonzero.");
+        hh = h;
+        xiphh = x; xiphh(d) += hh;
+        ximhh = x; ximhh(d) -= hh;
+        a(0, 0) = (value(xiphh) - value(ximhh)) / (2.0*hh);
+        err = big;
+        for (i = 1; i < ntab; i++) {
+          //Successive columns in the Neville tableau will go to smaller stepsizes and higher orders of extrapolation.
+          hh /= con;
+          xiphh = x; xiphh(d) += hh;
+          ximhh = x; ximhh(d) -= hh;
+          a(0, i) = (value(xiphh) - value(ximhh)) / (2.0 * hh); //Try new, smaller stepsize.
+          fac = con2;
+          for (j = 1; j <= i; j++) { //Compute extrapolations of various orders, requiring
+
+            a(j, i) = (a(j-1,i) * fac - a(j-1,i-1)) / (fac - 1.0); //no new function evaluations.
+            fac = con2 * fac;
+            errt = std::max({std::abs(a(j,i) - a(j-1,i)), std::abs(a(j,i) - a(j-1,i-1))});
+            //The error strategy is to compare each new extrapolation to one order lower, both at the present stepsize and the previous one.
+
+            if (errt <= err) {
+              //If error is decreased, save the improved answer.
+              err = errt;
+              ans = a(j,i);
+            }
+            //std::cout <<"errt " << errt << std::endl;
+          }
+
+          if (abs(a(i,i) - a(i-1,i-1)) >= safe * err) break;
+          //If higher order is worse by a significant factor SAFE, then quit early.
+        }
+        xiphh = x;
+        ximhh = x;
+        //std::cout <<"err " << err << std::endl;
+        grad(d) = ans;
+      }
+    }
+
+
+    void semifiniteHessian(const TVector &x, THessian &hessian, int accuracy = 3){
     //const Scalar eps = 2.2204e-6;
     const Scalar eps = std::numeric_limits<Scalar>::epsilon();
 
