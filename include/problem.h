@@ -108,10 +108,10 @@ class Problem {
     }
     return true;
   }
-
-  void finiteGradient(const  TVector &x, TVector &grad, int accuracy = 0) {
+    
+    void finiteGradient(const  TVector &x, TVector &grad, int accuracy = 0) {
     // accuracy can be 0, 1, 2, 3
-    const Scalar eps = std::numeric_limits<Scalar>::epsilon();
+    const Scalar eps = 2.2204e-6;
     const TIndex D = x.rows();
     static const std::array<std::vector<Scalar>, 4> coeff =
     { { {1, -1}, {1, -8, 8, -1}, {-1, 9, -45, 45, -9, 1}, {3, -32, 168, -672, 672, -168, 32, -3} } };
@@ -160,8 +160,7 @@ class Problem {
 
     for (TIndex d = 0; d < D; d++) {
 
-      Scalar gradi = grad(d);
-      Scalar h = std::sqrt(eps) * (std::abs(gradi) + std::sqrt(eps)); // John C. Nash Compact Numerical Methods for Computers
+      Scalar h = std::sqrt(eps) * (std::abs(grad(d)) + std::sqrt(eps)); // John C. Nash Compact Numerical Methods for Computers
       for (TIndex i = 0; i < D; i++) {
         hessian(d,i) = 0;
 
