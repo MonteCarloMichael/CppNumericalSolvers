@@ -13,12 +13,12 @@ class ATimeIntegrationSolverTest : public Test {};
 TEST_F(ATimeIntegrationSolverTest, Minimum) {
   Eigen::VectorXd  x(2);
   x << 1.0, 1.0;
-  Minimum2DProblem f;
+  QuadraticMinimum2DProblem f;
 
   cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::defaults();
   crit.iterations = 1000;
   crit.gradNorm = 1e-8;
-  cppoptlib::TimeIntegrationSolver<Minimum2DProblem> solver;
+  cppoptlib::TimeIntegrationSolver<QuadraticMinimum2DProblem> solver;
   solver.setDebug(cppoptlib::DebugLevel::High);
   solver.setStopCriteria(crit);
   solver.minimize(f, x);

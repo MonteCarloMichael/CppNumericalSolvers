@@ -15,11 +15,11 @@ class ALbfgsSolverTest : public Test {};
 TEST_F(ALbfgsSolverTest, Minimum) {
   Eigen::VectorXd  x(2);
   x << 1.0, 1.0;
-  Minimum2DProblem f;
+  QuadraticMinimum2DProblem f;
 
   cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::defaults();
   crit.iterations = 100;
-  cppoptlib::LbfgsSolver<Minimum2DProblem> solver;
+  cppoptlib::LbfgsSolver<QuadraticMinimum2DProblem> solver;
   solver.setDebug(cppoptlib::DebugLevel::High);
   solver.setStopCriteria(crit);
   solver.minimize(f, x);

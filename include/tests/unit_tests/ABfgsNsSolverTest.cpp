@@ -18,11 +18,11 @@ class ABfgsNsSolverTest : public Test {};
 TEST_F(ABfgsNsSolverTest, Minimum2D) {
   Eigen::VectorXd  x(2);
   x << 1.0, 1.0;
-  Minimum2DProblem f;
+  QuadraticMinimum2DProblem f;
 
   cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::defaults();
   crit.iterations = 100;
-  cppoptlib::BfgsnsSolver<Minimum2DProblem> solver;
+  cppoptlib::BfgsnsSolver<QuadraticMinimum2DProblem> solver;
   solver.setDebug(cppoptlib::DebugLevel::High);
   solver.setStopCriteria(crit);
   solver.minimize(f, x);
