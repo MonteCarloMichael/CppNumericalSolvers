@@ -146,6 +146,8 @@ public:
     grad(1) = 2*x(1);
     grad(2) = 2*x(2);
   }
+
+
 };
 
 class CuspProblemXD : public cppoptlib::Problem<double,Eigen::Dynamic> {

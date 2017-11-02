@@ -52,7 +52,9 @@ set(HEADER_FILES
         include/solver/timeintegrationsolver.h
         include/timeintegration/velocityverlet.h
         include/timeintegration/firealgorithm.h
-        )
+        include/overshootCorrection/umrigarcorrection.h
+        include/solver/gradientdescentumrigarlimitedsteplength.h
+        include/overshootCorrection/steplengthlimiter.h)
 
 add_library(${PROJECT_NAME} STATIC ${HEADER_FILES} dummy.cpp)
 target_link_libraries(${PROJECT_NAME}
