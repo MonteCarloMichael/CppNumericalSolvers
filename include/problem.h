@@ -323,6 +323,11 @@ class Problem {
     }
 
   }
+    virtual Eigen::VectorXd getNucleiPositions(){
+      return Eigen::VectorXd(0);
+    }
+
+private:
 
 };
 }

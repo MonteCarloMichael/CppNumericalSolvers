@@ -7,6 +7,8 @@
 
 #include <Eigen/Core>
 
+using namespace Eigen;
+
 namespace cppoptlib {
 
     template<typename ProblemType>
@@ -15,91 +17,161 @@ namespace cppoptlib {
         using Scalar = typename ProblemType::Scalar;
         using TVector = typename ProblemType::TVector;
 
-        /* this has to be called once before correctStep() to initialize the class variables
-         * otherwise, they will not have the correct dimensionality due to the dynamic vector size*/
-        UmrigarCorrector(){};
+        UmrigarCorrector(unsigned long numberOfElectrons, Scalar threshhold=1e-5)
+                : numberOfElectrons(numberOfElectrons),
+                  threshhold(threshhold),
+                  indicesOfElectronsNotAtCores()
+                {
+                    for(unsigned long i = 0; i < numberOfElectrons; i++ )
+                        indicesOfElectronsNotAtCores.push_back(i);
+                };
 
-        void initialize(const TVector &xElectron, const TVector &xNucleus3d) {
-            //TVector minDistance(xEl.rows()*xNuc.rows());
-            //TVector electronList(xNuc.rows());
-            //ggf mehrere Vektoren--> Für jeden Fall ein Vektor?
-        }
+        VectorXd correctStep(TVector &electronsPositions,
+                                  TVector &electronsPositionsChanged,
+                                  TVector &direction,
+                                  TVector &stepLengthCurrent,
+                                  const TVector &nucleiPositions,
+                                  Scalar distanceCriteriaUmrigar){
 
+            assert(nucleiPositions.rows()%3 == 0 && "Vector dimension must be divideable by 3");
 
-        int nearestElectronNumberReturn(const TVector &xElectron, const TVector &xNucleus3d){
+            Vector3d direction3d(3),stepLengthCurrent3d(3),nearestElectron3d(3), nucleusPosition3d(3);
 
-            //variables for loops
-            int i,j,k;
+            for(unsigned long nucleusIndex=0; nucleusIndex<(nucleiPositions.rows()/3); ++nucleusIndex) {
 
-            int nearestElectronNumber;
-            //Besser int?
-            double xElectronDimension = xElectron.rows();
-            TVector xNearestElectron3d(3), xElectronReference3d(3);
-            Scalar smallestDistance, distanceReference;
+                unsigned long nearestElectronIndex = nearestElectronIndexReturn(electronsPositions,
+                                                                                nucleusPosition3d);
 
-            for (k=0; k<3; ++k){
-                xNearestElectron3d(k)=xElectron(k);
-            }
+                Scalar nearestElectronDistance = nearestElectronDistanceReturn();
 
-            smallestDistance = (xNearestElectron3d-xNucleus3d).norm();
+                /*check, if an electron has a critical distance to a nucleus
+                if so, perform umrigar and overwrite the calculated steepest descent
+                coordinates of the regarding electrons*/
+                if (nearestElectronDistance <= distanceCriteriaUmrigar) {
 
-            //search nearest electron and save correspondent electron number
-            if (xElectronDimension>3){
-                for (i=2; i<=(xElectronDimension/3); ++i){
-                    for (j=(3*i-3); j<(3*i); ++j){
-                        xElectronReference3d(j-(3*i-3))=xElectron(j);
-                    }
-                    distanceReference = (xElectronReference3d-xNucleus3d).norm();
-                    if (distanceReference<smallestDistance){
-                        smallestDistance = distanceReference;
-                        //xNearestElectron3d = xElectronReference3d;
-                        nearestElectronNumber = i;
-                    }
+                    //save 3d coordinates of treated nucleus
+                    nucleusPosition3d = nucleiPositions.segment(nucleusIndex * 3, 3);
+
+                    //save information of the nearest electron
+                    direction3d = direction.segment(nearestElectronIndex * 3, 3);
+                    stepLengthCurrent3d = stepLengthCurrent.segment(nearestElectronIndex * 3, 3);
+                    nearestElectron3d = electronsPositions.segment(nearestElectronIndex * 3, 3);
+
+                    //correct step in 3d coordinate
+                    nearestElectron3d = correctStepMod(nearestElectron3d,
+                                                       nucleusPosition3d,
+                                                       direction3d,
+                                                       stepLengthCurrent3d,
+                                                       nearestElectronIndex);
+
+                    //correct step in 3n dimensional coordinate
+                    electronsPositionsChanged.segment(nearestElectronIndex * 3, 3) = nearestElectron3d;
                 }
             }
-            return nearestElectronNumber;
+            return electronsPositionsChanged;
         }
 
+        unsigned long nearestElectronIndexReturn(const TVector &electronsPositions,
+                                                 const Vector3d &nucleusPosition3d){
 
-        TVector correctStepMod(const TVector &xElectron3d, const TVector &xNucleus3d, const TVector &gradient3d, const TVector &stepLength3d) {
+            unsigned long nearestElectronIndex=indicesOfElectronsNotAtCores.front();
+            assert(electronsPositions.rows() == numberOfElectrons*3);
+            Vector3d nearestElectron3d(3), electronReference3d(3);
+            Scalar distanceReference;
 
-            TVector velocityElectron = -gradient3d;
-            TVector distance = xElectron3d- xNucleus3d;
-            TVector distanceNormalized = distance/(distance.norm());
+            nearestElectron3d = electronsPositions.segment(indicesOfElectronsNotAtCores.front()*3,3);
+
+            smallestDistance = (nearestElectron3d-nucleusPosition3d).norm();
+
+            //search nearest electron and save correspondent electron number
+            for(const auto& electronIndex : indicesOfElectronsNotAtCores){
+                electronReference3d = electronsPositions.segment(electronIndex*3,3);
+                distanceReference = (electronReference3d-nucleusPosition3d).norm();
+                if (distanceReference<smallestDistance){
+                    smallestDistance = distanceReference;
+                    nearestElectronIndex = electronIndex;
+                }
+            }
+
+            return nearestElectronIndex;
+        }
+
+        Scalar nearestElectronDistanceReturn(){
+            return smallestDistance;
+        }
+
+        Vector3d correctStepMod(const Vector3d &electronPosition3d,
+                                const Vector3d &nucleusPosition3d,
+                                const Vector3d &gradient3d,
+                                const Vector3d &stepLength3d,
+                                unsigned long electronIndex) {
+
+            Vector3d electronPosition3dNew;
+            Vector3d velocityElectron = -gradient3d;
+            Vector3d distance = electronPosition3d- nucleusPosition3d;
+
+            //if threshold to close, move the electron exactly in the core and stop doing the correctStep
+            //(if all electron are moved, this method will only return the nuleus position)
+            if (distance.norm() < threshhold) {
+                electronPosition3dNew = nucleusPosition3d;
+                //erase-remove idiom to delete the element of the vector which has the value electronIndex
+                indicesOfElectronsNotAtCores.erase(
+                        std::remove(indicesOfElectronsNotAtCores.begin(),
+                                    indicesOfElectronsNotAtCores.end(), electronIndex),
+                        indicesOfElectronsNotAtCores.end());
+                return electronPosition3dNew;
+            }
+
+            Vector3d distanceNormalized = distance/(distance.norm());
 
             Scalar vz = velocityElectron.dot(distanceNormalized);
 
-            TVector orthogonalToDistance = velocityElectron-(vz*distanceNormalized);
-            TVector orthogonalToDistanceNormalized = orthogonalToDistance/(orthogonalToDistance.norm());
+            Vector3d orthogonalToDistance = velocityElectron-(vz*distanceNormalized);
             Scalar orthogonalToDistanceNorm = (orthogonalToDistance).norm();
-            
-            Scalar rate = stepLength3d(1)/velocityElectron(1);
+            //important to prevent nan as a result
+            if(orthogonalToDistanceNorm==0.0){
+                return correctStepCut(electronPosition3d,nucleusPosition3d,gradient3d,stepLength3d);
+            }
+
+            Vector3d orthogonalToDistanceNormalized = orthogonalToDistance/orthogonalToDistanceNorm;
+
+            Scalar rate = stepLength3d.norm()/velocityElectron.norm();
             
             //Parameters to calculate the new position
             Scalar zNew = std::max(distance.norm()+vz*rate,0.0);
             Scalar rhoNew = 2*orthogonalToDistanceNorm*rate*zNew/(distance.norm()+zNew);
 
-            TVector xElectron3dNew = xNucleus3d + rhoNew*orthogonalToDistanceNormalized + zNew*distanceNormalized;
-            return xElectron3dNew;
+            electronPosition3dNew = nucleusPosition3d + rhoNew*orthogonalToDistanceNormalized + zNew*distanceNormalized;
+            return electronPosition3dNew;
         }
 
-        TVector correctStepCut(const TVector &xElectron3d, const TVector &xNucleus3d, const TVector &gradient3d, const TVector &stepLength3d){
+        Vector3d correctStepCut(const Vector3d &electronPosition3d,
+                                const Vector3d &nucleusPosition3d,
+                                const Vector3d &gradient3d,
+                                const Vector3d &stepLength3d){
 
-            TVector distance = xElectron3d- xNucleus3d;
-            TVector velocityElectronNormalized = (-gradient3d)/(-gradient3d).norm();
+            Vector3d distance = electronPosition3d- nucleusPosition3d;
+            Vector3d velocityElectronNormalized = (-gradient3d)/(-gradient3d).norm();
 
             //orthogonal projection of distVec on to velocityElNormalized, when the length of StepLength3D is bigger
-            TVector orthogonalProjection = -distance.dot(velocityElectronNormalized)*velocityElectronNormalized;
+            Vector3d orthogonalProjection = -distance.dot(velocityElectronNormalized)*velocityElectronNormalized;
             if (std::min(stepLength3d.norm(),(-distance.dot(velocityElectronNormalized)*velocityElectronNormalized).norm())==stepLength3d.norm()){
                 orthogonalProjection = stepLength3d;
             }
 
-            TVector xElectron3dNew = xElectron3d + orthogonalProjection;
-            return xElectron3dNew;
+            Vector3d electronPosition3dNew = electronPosition3d + orthogonalProjection;
+            return electronPosition3dNew;
+        }
+
+        std::vector<unsigned long> getIndicesOfElectronsNotAtCores (){
+            return indicesOfElectronsNotAtCores;
         }
 
     private:
-
+        unsigned long numberOfElectrons;
+        Scalar smallestDistance;
+        Scalar threshhold;
+        std::vector<unsigned long> indicesOfElectronsNotAtCores;
     };
 } /* namespace cppoptlib */
 

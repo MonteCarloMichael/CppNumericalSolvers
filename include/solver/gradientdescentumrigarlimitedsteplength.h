@@ -10,6 +10,7 @@
 #include "overshootCorrection/umrigarcorrection.h"
 #include "overshootCorrection/steplengthlimiter.h"
 
+using namespace Eigen;
 
 namespace cppoptlib {
 
@@ -32,106 +33,74 @@ namespace cppoptlib {
             stepLengthLimiter.setMaximalStepLength(maxStepLengthValue);
         }
 
-        void minimize(ProblemType &objFunc, TVector &electronPosition0) {
-
-            TVector direction(electronPosition0.rows());
-            TVector electronPositionOld(electronPosition0.rows());
-            this->m_current.reset();
-
-            objFunc.gradient(electronPosition0, direction);
-            do {
-                // überprüfe, ob ein elektron in kritischer nähe zum kern ist
-                    // wenn ja, dann umrigar korrektur für dieses elektron
-                    // wenn nein, dann normalen steepest descent schritt
-                electronPositionOld = electronPosition0;
-                electronPosition0 = electronPosition0 + stepLengthLimiter.limitStep(direction);
-
-
-
-                objFunc.gradient(electronPosition0, direction);
-
-                this->m_current.xDelta = (electronPositionOld-electronPosition0).template lpNorm<Eigen::Infinity>();
-                this->m_current.gradNorm = direction.template lpNorm<Eigen::Infinity>();
-                ++this->m_current.iterations;
-                this->m_status = checkConvergence(this->m_stop, this->m_current);
-            } while (objFunc.callback(this->m_current, electronPosition0) && (this->m_status == Status::Continue));
-            if (this->m_debug > DebugLevel::None) {
-                std::cout << "Stop status was: " << this->m_status << std::endl;
-                std::cout << "Stop criteria were: " << std::endl << this->m_stop << std::endl;
-                std::cout << "Current values are: " << std::endl << this->m_current << std::endl;
-            }
+        void setSteepestDescentRate(Scalar rateValue){
+            stepLengthLimiter.setRate(rateValue);
         }
 
-        void correctUmrigar(ProblemType &objFunc, TVector &electronPosition0, TVector &nucleusPosition) {
+        void setDistanceCriteriaUmrigar (Scalar distanceCriteriaUmrigarValue){
+            distanceCriteriaUmrigar = distanceCriteriaUmrigarValue;
+        }
 
-            //variables for loops
-            int l,n,nucleusNumber;
-            //Besser int?
-            double NucleusPositionDimension = nucleusPosition.rows();
+        void setThreshholdUmrigar (Scalar threshholdUmrigarValue){
+            threshholdUmrigar = threshholdUmrigarValue;
+        }
 
-            //TVector NICHT der richtige Datentyp!!!
-            TVector direction3d(3),stepLengthCurrent3d(3),nearestElectron3d(3), nucleusPosition3d(3);
+        void minimize(ProblemType &objFunc, TVector &electronsPositions0) {
 
-            TVector direction(electronPosition0.rows());
-            TVector electronPositionOld(electronPosition0.rows());
+            UmrigarCorrector<ProblemType> umrigarCorrector(electronsPositions0.rows()/3, threshholdUmrigar);
+
+            Eigen::VectorXd nucleiPositions = objFunc.getNucleiPositions();
+
+            TVector direction(electronsPositions0.rows());
+            TVector electronsPositionsOld(electronsPositions0.rows());
             this->m_current.reset();
 
-            objFunc.gradient(electronPosition0, direction);
+            objFunc.gradient(electronsPositions0, direction);
 
             do {
+                TVector stepLengthCurrent = stepLengthLimiter.limitStep(direction);
 
-                /*for (int i = 0; i < NucleusPositionDimension/3; ++i) {
-                    Eigen::Matrix<Scalar,3,1> nucleusPosition3d = nucleusPosition.segment(i*3,3);
-                }*/
+                //steepest descent step with adaptive step length
+                electronsPositionsOld = electronsPositions0;
+                electronsPositions0 = electronsPositions0 + stepLengthCurrent;
 
-                //correct step for each nucleus
-                for(nucleusNumber=1; nucleusNumber<=(NucleusPositionDimension/3); ++nucleusNumber){
+                electronsPositions0 = umrigarCorrector.correctStep(electronsPositionsOld,
+                                                                   electronsPositions0,
+                                                                   direction,
+                                                                   stepLengthCurrent,
+                                                                   nucleiPositions,
+                                                                   distanceCriteriaUmrigar);
 
-                    //save 3d coordinates of treated nucleus
-                    for(n=3*nucleusNumber-3;n<3*nucleusNumber; ++nucleusNumber){
-                        nucleusPosition3d(n-(3*nucleusNumber-3)) = nucleusPosition(n);
+                objFunc.gradient(electronsPositions0, direction);
 
+                std::vector<unsigned long> indicesOfElectronsNotAtCores = umrigarCorrector.getIndicesOfElectronsNotAtCores();
+                //if there are electrons at the nucleus set the corresponding gradient to 0.0
+                for(unsigned long electronIndex=0; electronIndex<(electronsPositions0.rows()/3); ++electronIndex) {
+                    if(!(std::find(indicesOfElectronsNotAtCores.begin(), indicesOfElectronsNotAtCores.end(), electronIndex) != indicesOfElectronsNotAtCores.end())){
+                        direction.segment(electronIndex*3,3)=Vector3d(0.0,0.0,0.0);
                     }
-
-                    int nearestElectronNumber = umrigarCorrector.nearestElectronNumberReturn(electronPosition0,nucleusPosition3d);
-
-                    electronPositionOld = electronPosition0;
-                    TVector stepLengthCurrent = stepLengthLimiter.limitStep(direction);
-
-                    //save information of the nearest electron
-                    for(l=3*nearestElectronNumber-3;l<3*nearestElectronNumber; ++l){
-                        direction3d(l-(3*nearestElectronNumber-3)) = direction(l);
-                        stepLengthCurrent3d(l-(3*nearestElectronNumber-3))=stepLengthCurrent3d(l);
-                        nearestElectron3d(l-(3*nearestElectronNumber-3)) = electronPosition0(l);
-                    }
-
-                    //correct step in 3d coordinate
-                    nearestElectron3d = umrigarCorrector.correctStepMod(nearestElectron3d,nucleusPosition3d,direction3d,stepLengthCurrent3d);
-
-                    //correct step in 3n dimensional coordinate
-                    for(l=3*nearestElectronNumber-3;l<3*nearestElectronNumber; ++l){
-                        electronPosition0(l) = nearestElectron3d(l-(3*nearestElectronNumber-3));
-                    }
-
-                    objFunc.gradient(electronPosition0, direction);
-
                 }
 
-                this->m_current.xDelta = (electronPositionOld-electronPosition0).template lpNorm<Eigen::Infinity>();
+                //std::cout << electronsPositions0 << std::endl;
+
+                this->m_current.xDelta = (electronsPositionsOld-electronsPositions0).template lpNorm<Eigen::Infinity>();
                 this->m_current.gradNorm = direction.template lpNorm<Eigen::Infinity>();
                 ++this->m_current.iterations;
                 this->m_status = checkConvergence(this->m_stop, this->m_current);
-            } while (objFunc.callback(this->m_current, electronPosition0) && (this->m_status == Status::Continue));
+            } while (objFunc.callback(this->m_current, electronsPositions0) && (this->m_status == Status::Continue));
             if (this->m_debug > DebugLevel::None) {
                 std::cout << "Stop status was: " << this->m_status << std::endl;
                 std::cout << "Stop criteria were: " << std::endl << this->m_stop << std::endl;
                 std::cout << "Current values are: " << std::endl << this->m_current << std::endl;
+
+                std::cout << electronsPositions0 << std::endl;
             }
         }
 
     private:
-        UmrigarCorrector<ProblemType> umrigarCorrector;
         StepLengthLimiter<ProblemType> stepLengthLimiter;
+        Scalar distanceCriteriaUmrigar;
+        Scalar threshholdUmrigar;
     };
 
 

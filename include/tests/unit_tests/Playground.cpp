@@ -13,28 +13,75 @@ using namespace testing;
 
 class AGradientDescentUmrigarLimitedStepLengthSolverTest : public Test {};
 
-TEST_F(AGradientDescentUmrigarLimitedStepLengthSolverTest , Minimum) {
-    /*Eigen::VectorXd x(2);
-    x << 1.0, 1.0;
-    QuadraticMinimum2DProblem f;
+TEST_F(AGradientDescentUmrigarLimitedStepLengthSolverTest , twoCuspsOneNucleusSmoothQuadraticTest) {
+    Eigen::VectorXd x(9);
+    x << 0.5, 0.5, 0.5, 2.0, 2.0, 2.0, 0.5, 0.5, 0.5;
+    UmrigarTwoCuspsOneNucleusSmoothQuadradicProblem9D f;
 
     cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::defaults();
     crit.iterations = 1000;
     crit.gradNorm = 1e-5;
-    cppoptlib::GradientDescentUmrigarLimitedSteplength<QuadraticMinimum2DProblem> solver;
+    cppoptlib::GradientDescentUmrigarLimitedSteplength<UmrigarTwoCuspsOneNucleusSmoothQuadradicProblem9D> solver;
     solver.setDebug(cppoptlib::DebugLevel::High);
     solver.setStopCriteria(crit);
-    solver.setMaxStepLength(0.5);
-    solver.minimize(f, x);
+    solver.setMaxStepLength(1e-1);
+    solver.setSteepestDescentRate(1.0);
+    solver.setDistanceCriteriaUmrigar(0.5);
+    solver.setThreshholdUmrigar(1e-5);
+    solver.minimize(f,x);
 
-    Eigen::VectorXd xref(2);
-    xref << 0.0, 0.0;
-    ASSERT_TRUE((x-xref).norm() < 1e-6);*/
+    Eigen::VectorXd xref(9);
+    xref << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0;
+    ASSERT_TRUE((x-xref).norm() < 1e-2);
+}
 
+TEST_F(AGradientDescentUmrigarLimitedStepLengthSolverTest , cuspSmoothQuadraticTest) {
+    Eigen::VectorXd x(6);
+    x << 0.5, 0.5, 0.5, 0.5, 0.5, 0.5;
+    UmrigarCuspSmoothQuadradicProblem6D f;
+
+    cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::defaults();
+    crit.iterations = 1000;
+    crit.gradNorm = 1e-5;
+    cppoptlib::GradientDescentUmrigarLimitedSteplength<UmrigarCuspSmoothQuadradicProblem6D> solver;
+    solver.setDebug(cppoptlib::DebugLevel::High);
+    solver.setStopCriteria(crit);
+    solver.setMaxStepLength(1e-2);
+    solver.setSteepestDescentRate(1e-3);
+    solver.setDistanceCriteriaUmrigar(0.5);
+    solver.setThreshholdUmrigar(1e-5);
+    solver.minimize(f,x);
+
+    Eigen::VectorXd xref(6);
+    xref << 0.0, 0.0, 0.0, 1.0, 1.0, 1.0;
+    ASSERT_TRUE((x-xref).norm() < 1e-2);
+}
+
+TEST_F(AGradientDescentUmrigarLimitedStepLengthSolverTest , cuspUmrigarTest) {
     Eigen::VectorXd x(3);
-    Eigen::VectorXd p(3);
     x << 1.0, 1.0, 1.0;
-    p << 0.0, 0.0, 0.0;
+    UmrigarCuspProblem3D f;
+
+    cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::defaults();
+    crit.iterations = 1000;
+    crit.gradNorm = 1e-5;
+    cppoptlib::GradientDescentUmrigarLimitedSteplength<UmrigarCuspProblem3D> solver;
+    solver.setDebug(cppoptlib::DebugLevel::High);
+    solver.setStopCriteria(crit);
+    solver.setMaxStepLength(1e-1);
+    solver.setSteepestDescentRate(1e-5);
+    solver.setDistanceCriteriaUmrigar(1e-1);
+    solver.setThreshholdUmrigar(1e-5);
+    solver.minimize(f,x);
+
+    Eigen::VectorXd xref(3);
+    xref << 0.0, 0.0, 0.0;
+    ASSERT_TRUE((x-xref).norm() < 1e-2);
+}
+
+TEST_F(AGradientDescentUmrigarLimitedStepLengthSolverTest , firstTestForDebugging) {
+    Eigen::VectorXd x(3);
+    x << 1.0, 1.0, 1.0;
     CuspProblem3D f;
 
     cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::defaults();
@@ -44,7 +91,8 @@ TEST_F(AGradientDescentUmrigarLimitedStepLengthSolverTest , Minimum) {
     solver.setDebug(cppoptlib::DebugLevel::High);
     solver.setStopCriteria(crit);
     solver.setMaxStepLength(0.5);
-    solver.correctUmrigar(f,x,p);
+    solver.setDistanceCriteriaUmrigar(1e-2);
+    solver.minimize(f,x);
 
     Eigen::VectorXd xref(3);
     xref << 0.0, 0.0, 0.0;
@@ -59,7 +107,7 @@ TEST_F(AGradientDescentSimpleSolverTest , Minimum) {
     QuadraticMinimum2DProblem f;
 
     cppoptlib::Criteria<double> crit = cppoptlib::Criteria<double>::defaults();
-    crit.iterations = 1000;
+    crit.iterations = 100000;
     crit.gradNorm = 1e-5;
     cppoptlib::GradientDescentSimpleSolver<QuadraticMinimum2DProblem> solver;
     solver.setDebug(cppoptlib::DebugLevel::High);

@@ -147,7 +147,9 @@ public:
     grad(2) = 2*x(2);
   }
 
-
+    Eigen::VectorXd getNucleiPositions(){
+        return Eigen::Vector3d(1,2,3);
+    }
 };
 
 class CuspProblemXD : public cppoptlib::Problem<double,Eigen::Dynamic> {
@@ -199,6 +201,84 @@ public:
     grad[0]  = -2 * (1 - x[0]) + 200 * (x[1] - x[0] * x[0]) * (-2 * x[0]);
     grad[1]  = 200 * (x[1] - x[0] * x[0]);
   }
+};
+
+class UmrigarCuspProblem3D : public cppoptlib::Problem<double,Eigen::Dynamic> {
+public:
+    double value(const Eigen::VectorXd &x) {
+        return -std::exp(-(std::abs(x(0))+std::abs(x(1))+std::abs(x(2))));
+    }
+
+    void gradient(const Eigen::VectorXd &x, Eigen::VectorXd &grad) {
+        if(x(0)>=0) grad(0) = +std::exp(-(std::abs(x(0))+std::abs(x(1))+std::abs(x(2))));
+        else        grad(0) = -std::exp(-(std::abs(x(0))+std::abs(x(1))+std::abs(x(2))));
+        if(x(1)>=0) grad(1) = +std::exp(-(std::abs(x(0))+std::abs(x(1))+std::abs(x(2))));
+        else        grad(1) = -std::exp(-(std::abs(x(0))+std::abs(x(1))+std::abs(x(2))));
+        if(x(2)>=0) grad(2) = +std::exp(-(std::abs(x(0))+std::abs(x(1))+std::abs(x(2))));
+        else        grad(2) = -std::exp(-(std::abs(x(0))+std::abs(x(1))+std::abs(x(2))));
+    }
+
+    Eigen::VectorXd getNucleiPositions(){
+        return Eigen::Vector3d(0,0,0);
+    }
+};
+
+class UmrigarCuspSmoothQuadradicProblem6D : public cppoptlib::Problem<double,Eigen::Dynamic> {
+public:
+    double value(const Eigen::VectorXd &x) {
+        return -std::exp(-(std::abs(x(0))+std::abs(x(1))+std::abs(x(2))))
+               +(x(3)-1)*(x(3)-1)+(x(4)-1)*(x(4)-1)+(x(5)-1)*(x(5)-1);
+    }
+
+    void gradient(const Eigen::VectorXd &x, Eigen::VectorXd &grad) {
+        if(x(0)>=0) grad(0) = +std::exp(-(std::abs(x(0))+std::abs(x(1))+std::abs(x(2))));
+        else        grad(0) = -std::exp(-(std::abs(x(0))+std::abs(x(1))+std::abs(x(2))));
+        if(x(1)>=0) grad(1) = +std::exp(-(std::abs(x(0))+std::abs(x(1))+std::abs(x(2))));
+        else        grad(1) = -std::exp(-(std::abs(x(0))+std::abs(x(1))+std::abs(x(2))));
+        if(x(2)>=0) grad(2) = +std::exp(-(std::abs(x(0))+std::abs(x(1))+std::abs(x(2))));
+        else        grad(2) = -std::exp(-(std::abs(x(0))+std::abs(x(1))+std::abs(x(2))));
+
+        grad(3) = 2*x(3)-2;
+        grad(4) = 2*x(4)-2;
+        grad(5) = 2*x(5)-2;
+    }
+
+    Eigen::VectorXd getNucleiPositions(){
+        return Eigen::Vector3d(0,0,0);
+    }
+};
+
+class UmrigarTwoCuspsOneNucleusSmoothQuadradicProblem9D : public cppoptlib::Problem<double,Eigen::Dynamic> {
+public:
+    double value(const Eigen::VectorXd &x) {
+        return -std::exp(-(std::abs(x(0))+std::abs(x(1))+std::abs(x(2))))
+               -std::exp(-(std::abs(x(3))+std::abs(x(4))+std::abs(x(5))))
+               +(x(6)-1)*(x(7)-1)+(x(8)-1)*(x(4)-1)+(x(5)-1)*(x(5)-1);
+    }
+
+    void gradient(const Eigen::VectorXd &x, Eigen::VectorXd &grad) {
+        if(x(0)>=0) grad(0) = +std::exp(-(std::abs(x(0))+std::abs(x(1))+std::abs(x(2))));
+        else        grad(0) = -std::exp(-(std::abs(x(0))+std::abs(x(1))+std::abs(x(2))));
+        if(x(1)>=0) grad(1) = +std::exp(-(std::abs(x(0))+std::abs(x(1))+std::abs(x(2))));
+        else        grad(1) = -std::exp(-(std::abs(x(0))+std::abs(x(1))+std::abs(x(2))));
+        if(x(2)>=0) grad(2) = +std::exp(-(std::abs(x(0))+std::abs(x(1))+std::abs(x(2))));
+        else        grad(2) = -std::exp(-(std::abs(x(0))+std::abs(x(1))+std::abs(x(2))));
+
+        if(x(0)>=0) grad(3) = +std::exp(-(std::abs(x(3))+std::abs(x(4))+std::abs(x(5))));
+        else        grad(3) = -std::exp(-(std::abs(x(3))+std::abs(x(4))+std::abs(x(5))));
+        if(x(1)>=0) grad(4) = +std::exp(-(std::abs(x(3))+std::abs(x(4))+std::abs(x(5))));
+        else        grad(4) = -std::exp(-(std::abs(x(3))+std::abs(x(4))+std::abs(x(5))));
+        if(x(2)>=0) grad(5) = +std::exp(-(std::abs(x(3))+std::abs(x(4))+std::abs(x(5))));
+        else        grad(5) = -std::exp(-(std::abs(x(3))+std::abs(x(4))+std::abs(x(5))));
+
+        grad(6) = 2*x(6)-2;
+        grad(7) = 2*x(7)-2;
+        grad(8) = 2*x(8)-2;
+    }
+
+    Eigen::VectorXd getNucleiPositions(){
+        return Eigen::Vector3d(0,0,0);
+    }
 };
 
 #endif //TESTPROBLEMS_H

@@ -15,15 +15,18 @@ namespace cppoptlib {
         using Scalar = typename ProblemType::Scalar;
         using TVector = typename ProblemType::TVector;
 
-        /* this has to be called once before correctStep() to initialize the class variables
-         * otherwise, they will not have the correct dimensionality due to the dynamic vector size*/
-        StepLengthLimiter(Scalar maximalStepLengthValue = 1.0):
+        StepLengthLimiter(Scalar maximalStepLengthValue = 1.0, Scalar rateValue = 1e-4):
             maximalStepLength(maximalStepLengthValue),
-            rate(1e-4){};
+            rate(rateValue){};
 
         TVector limitStep(const TVector &gradientCurrent) {
             TVector stepLength =  - gradientCurrent*rate;
-            Scalar lambda = std::min(maximalStepLength,gradientCurrent.norm());
+            Scalar lambda = std::min(maximalStepLength,stepLength.norm());
+
+            //providing nan as result
+            if (stepLength.norm()==0){
+                return stepLength;
+            }
 
             TVector stepLengthNew =  lambda*stepLength/stepLength.norm();
             return stepLengthNew;
@@ -32,6 +35,11 @@ namespace cppoptlib {
         void setMaximalStepLength(Scalar maximalStepLengthValue){
             assert(maximalStepLengthValue > 0);
             maximalStepLength = maximalStepLengthValue;
+        }
+
+        void setRate(Scalar rateValue){
+            assert(rateValue > 0);
+            rate = rateValue;
         }
 
     private:
