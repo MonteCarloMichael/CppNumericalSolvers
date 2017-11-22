@@ -92,8 +92,6 @@ namespace cppoptlib {
                 std::cout << "Stop status was: " << this->m_status << std::endl;
                 std::cout << "Stop criteria were: " << std::endl << this->m_stop << std::endl;
                 std::cout << "Current values are: " << std::endl << this->m_current << std::endl;
-
-                std::cout << electronsPositions0 << std::endl;
             }
         }
 
