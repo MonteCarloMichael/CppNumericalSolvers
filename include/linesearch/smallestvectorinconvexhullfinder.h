@@ -24,7 +24,7 @@ namespace cppoptlib {
     using TSquareSetMatrix  = Eigen::Matrix<Scalar, SetSize, SetSize>;
     using TFlattenedSquareMatrix = Eigen::Matrix<Scalar, SetSize*SetSize, 1>;
 
-    SmallestVectorInConvexHullFinder(){};
+    SmallestVectorInConvexHullFinder() = default;
 
     //TODO find a more efficient way
     void resizeFinder(const long int newDim, const long int newSetSize){

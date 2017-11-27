@@ -51,6 +51,7 @@ namespace cppoptlib {
 
             Eigen::VectorXd nucleiPositions = objFunc.getNucleiPositions();
 
+            // TODO warum nennst du den Gradienten direction?
             TVector direction(electronsPositions0.rows());
             TVector electronsPositionsOld(electronsPositions0.rows());
             this->m_current.reset();

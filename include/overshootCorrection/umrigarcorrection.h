@@ -53,6 +53,7 @@ namespace cppoptlib {
                     nucleusPosition3d = nucleiPositions.segment(nucleusIndex * 3, 3);
 
                     //save information of the nearest electron
+                    //TODO direction3d ist ein schlechter Name, weil man nicht weiß, wovon es die Direction ist
                     direction3d = direction.segment(nearestElectronIndex * 3, 3);
                     stepLengthCurrent3d = stepLengthCurrent.segment(nearestElectronIndex * 3, 3);
                     nearestElectron3d = electronsPositions.segment(nearestElectronIndex * 3, 3);
