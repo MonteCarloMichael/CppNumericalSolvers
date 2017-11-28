@@ -5,6 +5,7 @@
 #include <Eigen/Core>
 #include "isolver.h"
 #include "../linesearch/morethuente.h"
+#include "../overshootCorrection/steplengthlimiter.h"
 
 namespace cppoptlib {
 
@@ -24,18 +25,23 @@ public:
    */
   void minimize(ProblemType &objFunc, TVector &x0) {
 
-    TVector direction(x0.rows());
+    TVector grad(x0.rows());
     this->m_current.reset();
+    objFunc.gradient(x0, grad);
     do {
-      ;
-      objFunc.gradient(x0, direction);
-      const Scalar rate = MoreThuente<ProblemType, 1>::linesearch(x0, -direction, objFunc) ;
-      x0 = x0 - rate * direction;
-      this->m_current.gradNorm = direction.template lpNorm<Eigen::Infinity>();
+
+      const Scalar rate = MoreThuente<ProblemType, 1>::linesearch(x0, -grad, objFunc, 0.1) ;
+      TVector step = rate * grad;
+
+      StepLengthLimiter<ElectronicWaveFunctionProblem>::limitStepLength(step,0.1);
+      x0 = x0 - step;
+
+      objFunc.gradient(x0, grad);
+      this->m_current.gradNorm = grad.template lpNorm<Eigen::Infinity>();
       // std::cout << "iter: "<<iter<< " f = " <<  objFunc.value(x0) << " ||g||_inf "<<gradNorm  << std::endl;
       ++this->m_current.iterations;
       this->m_status = checkConvergence(this->m_stop, this->m_current);
-    } while (objFunc.callback(this->m_current, x0) && (this->m_status == Status::Continue));
+    } while (objFunc.callback(this->m_current, x0, grad) && (this->m_status == Status::Continue));
     if (this->m_debug > DebugLevel::None) {
         std::cout << "Stop status was: " << this->m_status << std::endl;
         std::cout << "Stop criteria were: " << std::endl << this->m_stop << std::endl;

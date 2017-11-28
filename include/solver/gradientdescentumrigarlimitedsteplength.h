@@ -88,7 +88,7 @@ namespace cppoptlib {
                 this->m_current.gradNorm = direction.template lpNorm<Eigen::Infinity>();
                 ++this->m_current.iterations;
                 this->m_status = checkConvergence(this->m_stop, this->m_current);
-            } while (objFunc.callback(this->m_current, electronsPositions0) && (this->m_status == Status::Continue));
+            } while (objFunc.callback(this->m_current, electronsPositions0, direction) && (this->m_status == Status::Continue));
             if (this->m_debug > DebugLevel::None) {
                 std::cout << "Stop status was: " << this->m_status << std::endl;
                 std::cout << "Stop criteria were: " << std::endl << this->m_stop << std::endl;

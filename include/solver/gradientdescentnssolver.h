@@ -92,7 +92,7 @@ public:
       // std::cout << "iter: "<<iter<< " f = " <<  objFunc.value(x0) << " ||g||_inf "<<gradNorm  << std::endl;
       ++this->m_current.iterations;
       this->m_status = checkConvergence(this->m_stop, this->m_current);
-    } while (objFunc.callback(this->m_current, x0) && (this->m_status == Status::Continue));
+    } while (objFunc.callback(this->m_current, x0, grad) && (this->m_status == Status::Continue));
     if (this->m_debug > DebugLevel::None) {
         std::cout << "Stop status was: " << this->m_status << std::endl;
         std::cout << "Stop criteria were: " << std::endl << this->m_stop << std::endl;

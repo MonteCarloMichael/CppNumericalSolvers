@@ -61,7 +61,7 @@ namespace cppoptlib {
         }
 
         // do step
-        const Scalar rate = ArmijoWolfe<ProblemType, 1>::linesearch(x0, searchDir, objFunc);
+        const Scalar rate = ArmijoWolfe<ProblemType, 1>::linesearch(x0, searchDir, objFunc,1e-3);
         TVector s = rate * searchDir;
         x0 = x0 + s;
         this->m_current.xDelta = (x_old - x0).norm();
@@ -119,7 +119,7 @@ namespace cppoptlib {
         this->m_current.gradNorm = grad.template lpNorm<Eigen::Infinity>();
         // std::cout << "iter: "<<iter<< " f = " <<  objFunc.value(x0) << " ||g||_inf "<<gradNorm   << std::endl;
         this->m_status = checkConvergence(this->m_stop, this->m_current);
-      } while (objFunc.callback(this->m_current, x0) && (this->m_status == Status::Continue));
+      } while (objFunc.callback(this->m_current, x0,grad) && (this->m_status == Status::Continue));
     }
   };
 

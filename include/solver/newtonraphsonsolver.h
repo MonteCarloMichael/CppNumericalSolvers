@@ -35,7 +35,7 @@ namespace cppoptlib {
         this->m_current.xDelta = delta_x.template lpNorm<Eigen::Infinity>();
         this->m_current.gradNorm = grad.template lpNorm<Eigen::Infinity>();
         this->m_status = checkConvergence(this->m_stop, this->m_current);
-      } while (objFunc.callback(this->m_current, x0) && (this->m_status == Status::Continue));
+      } while (objFunc.callback(this->m_current, x0, grad) && (this->m_status == Status::Continue));
     }
   };
 

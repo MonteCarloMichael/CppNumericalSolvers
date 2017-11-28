@@ -221,7 +221,7 @@ class LbfgsbSolver : public ISolver<TProblem, 1> {
     };
     this->m_current.reset();
     this->m_status = Status::Continue;
-    while (problem.callback(this->m_current, x) && noConvergence(x, g) && (this->m_status == Status::Continue)) {
+    while (problem.callback(this->m_current, x, g) && noConvergence(x, g) && (this->m_status == Status::Continue)) {
       Scalar f_old = f;
       TVector x_old = x;
     TVector g_old = g;

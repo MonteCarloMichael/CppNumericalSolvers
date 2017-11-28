@@ -22,12 +22,17 @@ class Problem {
   using MatrixType = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>;
 
  public:
-  Problem() {}
+  Problem() = default;
   virtual ~Problem()= default;
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-  virtual bool callback(const Criteria<Scalar> &state, const TVector &x) {
+
+  virtual bool callback(const Criteria<Scalar> &state, TVector &x) {
+      return true;
+    }
+
+  virtual bool callback(const Criteria<Scalar> &state, TVector &x, TVector &grad) {
     return true;
   }
 
@@ -323,9 +328,6 @@ class Problem {
     }
 
   }
-
-private:
-
 };
 }
 
