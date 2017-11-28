@@ -29,8 +29,8 @@ namespace cppoptlib {
 
       assert(searchDir.norm() != 0);
 
-      const Scalar c1 = 0;//value from hanso 1e-4;
-      const Scalar c2 = 0.5; //value from hanso //value suggested in Numerical Optimiziation book = 0.9;
+      const Scalar c1 = 1e-4;//value from hanso 1e-4;
+      const Scalar c2 = 0.9; //value from hanso //value suggested in Numerical Optimiziation book = 0.9;
       Scalar a = 0;
       Scalar b = std::numeric_limits<Scalar>::infinity();
       Scalar alpha = alpha_init; // important to try steplength one first
