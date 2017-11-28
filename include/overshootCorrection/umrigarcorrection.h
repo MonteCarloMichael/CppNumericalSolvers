@@ -17,7 +17,7 @@ namespace cppoptlib {
         using Scalar = typename ProblemType::Scalar;
         using TVector = typename ProblemType::TVector;
 
-        UmrigarCorrector(unsigned long numberOfElectrons, Scalar threshhold=1e-5, ProblemType &problem)
+        UmrigarCorrector(ProblemType &problem, unsigned long numberOfElectrons, Scalar threshhold=1e-5)
                 : problem_(problem),
                   numberOfElectrons_(numberOfElectrons),
                   threshhold_(threshhold),
