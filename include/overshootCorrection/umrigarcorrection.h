@@ -19,12 +19,12 @@ namespace cppoptlib {
 
         UmrigarCorrector(unsigned long numberOfElectrons, Scalar threshhold=1e-5, ProblemType &problem)
                 : problem_(problem),
-                  numberOfElectrons(numberOfElectrons),
-                  threshhold(threshhold),
-                  indicesOfElectronsNotAtCores()
+                  numberOfElectrons_(numberOfElectrons),
+                  threshhold_(threshhold),
+                  indicesOfElectronsNotAtCores_()
                 {
                     for(unsigned long i = 0; i < numberOfElectrons; i++ )
-                        indicesOfElectronsNotAtCores.push_back(i);
+                        indicesOfElectronsNotAtCores_.push_back(i);
                 };
 
         VectorXd correctStep(TVector &electronsPositions,
@@ -75,17 +75,17 @@ namespace cppoptlib {
         unsigned long nearestElectronIndexReturn(const TVector &electronsPositions,
                                                  const Vector3d &nucleusPosition3d){
 
-            unsigned long nearestElectronIndex=indicesOfElectronsNotAtCores.front();
-            assert(electronsPositions.rows() == numberOfElectrons*3);
+            unsigned long nearestElectronIndex=indicesOfElectronsNotAtCores_.front();
+            assert(electronsPositions.rows() == numberOfElectrons_*3);
             Vector3d nearestElectron(3), electronReference(3);
             Scalar distanceReference;
 
-            nearestElectron = electronsPositions.segment(indicesOfElectronsNotAtCores.front()*3,3);
+            nearestElectron = electronsPositions.segment(indicesOfElectronsNotAtCores_.front()*3,3);
 
             smallestDistance = (nearestElectron-nucleusPosition3d).norm();
 
             //search nearest electron and save correspondent electron number
-            for(const auto& electronIndex : indicesOfElectronsNotAtCores){
+            for(const auto& electronIndex : indicesOfElectronsNotAtCores_){
                 electronReference = electronsPositions.segment(electronIndex*3,3);
                 distanceReference = (electronReference-nucleusPosition3d).norm();
                 if (distanceReference<smallestDistance){
@@ -113,13 +113,13 @@ namespace cppoptlib {
 
             //if threshold to close, move the electron exactly in the core and stop doing the correctStep
             //(if all electron are moved, this method will only return the nuleus position)
-            if (distance.norm() < threshhold) {
+            if (distance.norm() < threshhold_) {
                 electronPosition3dNew = nucleusPosition3d;
                 //erase-remove idiom to delete the element of the vector which has the value electronIndex
-                indicesOfElectronsNotAtCores.erase(
-                        std::remove(indicesOfElectronsNotAtCores.begin(),
-                                    indicesOfElectronsNotAtCores.end(), electronIndex),
-                        indicesOfElectronsNotAtCores.end());
+                indicesOfElectronsNotAtCores_.erase(
+                        std::remove(indicesOfElectronsNotAtCores_.begin(),
+                                    indicesOfElectronsNotAtCores_.end(), electronIndex),
+                        indicesOfElectronsNotAtCores_.end());
                 return electronPosition3dNew;
             }
 
@@ -165,15 +165,15 @@ namespace cppoptlib {
         }
 
         std::vector<unsigned long> getIndicesOfElectronsNotAtCores (){
-            return indicesOfElectronsNotAtCores;
+            return indicesOfElectronsNotAtCores_;
         }
 
     private:
-        ProblemType problem_;
-        unsigned long numberOfElectrons;
+        ProblemType& problem_;
+        unsigned long numberOfElectrons_;
         Scalar smallestDistance;
-        Scalar threshhold;
-        std::vector<unsigned long> indicesOfElectronsNotAtCores;
+        Scalar threshhold_;
+        std::vector<unsigned long> indicesOfElectronsNotAtCores_;
     };
 } /* namespace cppoptlib */
 

@@ -30,24 +30,24 @@ namespace cppoptlib {
          */
 
         void setMaxStepLength(Scalar maxStepLengthValue){
-            maximalStepLength=maxStepLengthValue;
+            maximalStepLength_=maxStepLengthValue;
         }
 
         void setSteepestDescentRate(Scalar rateValue){
-            rate = rateValue;
+            rate_ = rateValue;
         }
 
         void setDistanceCriteriaUmrigar (Scalar distanceCriteriaUmrigarValue){
-            distanceCriteriaUmrigar = distanceCriteriaUmrigarValue;
+            distanceCriteriaUmrigar_ = distanceCriteriaUmrigarValue;
         }
 
         void setThreshholdUmrigar (Scalar threshholdUmrigarValue){
-            threshholdUmrigar = threshholdUmrigarValue;
+            threshholdUmrigar_ = threshholdUmrigarValue;
         }
 
         void minimize(ProblemType &objFunc, TVector &electronsPositions0) {
 
-            UmrigarCorrector<ProblemType> umrigarCorrector(electronsPositions0.rows()/3, threshholdUmrigar, ProblemType &objFunc);
+            UmrigarCorrector<ProblemType> umrigarCorrector(electronsPositions0.rows()/3, threshholdUmrigar_, ProblemType &objFunc);
 
             Eigen::VectorXd nucleiPositions = objFunc.getNucleiPositions();
 
@@ -59,8 +59,8 @@ namespace cppoptlib {
             objFunc.gradient(electronsPositions0, direction);
 
             do {
-                TVector step= -rate*direction;
-                StepLengthLimiter<ProblemType>::limitStepLength(step, maximalStepLength);
+                TVector step= -rate_*direction;
+                StepLengthLimiter<ProblemType>::limitStepLength(step, maximalStepLength_);
 
                 //steepest descent step with adaptive step length
                 electronsPositionsOld = electronsPositions0;
@@ -71,7 +71,7 @@ namespace cppoptlib {
                                                                    direction,
                                                                    step,
                                                                    nucleiPositions,
-                                                                   distanceCriteriaUmrigar);
+                                                                   distanceCriteriaUmrigar_);
 
                 objFunc.gradient(electronsPositions0, direction);
 
@@ -98,10 +98,10 @@ namespace cppoptlib {
         }
 
     private:
-        Scalar distanceCriteriaUmrigar;
-        Scalar threshholdUmrigar;
-        Scalar rate;
-        Scalar maximalStepLength;
+        Scalar distanceCriteriaUmrigar_;
+        Scalar threshholdUmrigar_;
+        Scalar rate_;
+        Scalar maximalStepLength_;
     };
 
 
