@@ -33,7 +33,7 @@ public:
       const Scalar rate = MoreThuente<ProblemType, 1>::linesearch(x0, -grad, objFunc, 0.1) ;
       TVector step = rate * grad;
 
-      StepLengthLimiter<ElectronicWaveFunctionProblem>::limitStepLength(step,0.1);
+      StepLengthLimiter<ProblemType>::limitStepLength(step,0.1);
       x0 = x0 - step;
 
       objFunc.gradient(x0, grad);

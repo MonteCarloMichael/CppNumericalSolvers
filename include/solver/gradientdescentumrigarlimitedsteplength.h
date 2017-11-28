@@ -30,11 +30,11 @@ namespace cppoptlib {
          */
 
         void setMaxStepLength(Scalar maxStepLengthValue){
-            stepLengthLimiter.setMaximalStepLength(maxStepLengthValue);
+            maximalStepLength=maxStepLengthValue;
         }
 
         void setSteepestDescentRate(Scalar rateValue){
-            stepLengthLimiter.setRate(rateValue);
+            rate = rateValue;
         }
 
         void setDistanceCriteriaUmrigar (Scalar distanceCriteriaUmrigarValue){
@@ -59,16 +59,17 @@ namespace cppoptlib {
             objFunc.gradient(electronsPositions0, direction);
 
             do {
-                TVector stepLengthCurrent = stepLengthLimiter.limitStep(direction);
+                TVector step= -rate*direction;
+                StepLengthLimiter<ProblemType>::limitStepLength(step, maximalStepLength);
 
                 //steepest descent step with adaptive step length
                 electronsPositionsOld = electronsPositions0;
-                electronsPositions0 = electronsPositions0 + stepLengthCurrent;
+                electronsPositions0 = electronsPositions0 + step;
 
                 electronsPositions0 = umrigarCorrector.correctStep(electronsPositionsOld,
                                                                    electronsPositions0,
                                                                    direction,
-                                                                   stepLengthCurrent,
+                                                                   step,
                                                                    nucleiPositions,
                                                                    distanceCriteriaUmrigar);
 
@@ -97,9 +98,10 @@ namespace cppoptlib {
         }
 
     private:
-        StepLengthLimiter<ProblemType> stepLengthLimiter;
         Scalar distanceCriteriaUmrigar;
         Scalar threshholdUmrigar;
+        Scalar rate;
+        Scalar maximalStepLength;
     };
 
 

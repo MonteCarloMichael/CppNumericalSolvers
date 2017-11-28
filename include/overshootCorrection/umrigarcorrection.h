@@ -35,12 +35,15 @@ namespace cppoptlib {
 
             assert(nucleiPositions.rows()%3 == 0 && "Vector dimension must be divideable by 3");
 
-            Vector3d direction3d(3),stepLengthCurrent3d(3),nearestElectron3d(3), nucleusPosition3d(3);
+            Vector3d directionNearestElectron,stepLengthCurrentNearestElectron, nearestElectron, nucleusPosition;
 
             for(unsigned long nucleusIndex=0; nucleusIndex<(nucleiPositions.rows()/3); ++nucleusIndex) {
 
+                //save 3d coordinates of treated nucleus
+                nucleusPosition = nucleiPositions.segment(nucleusIndex * 3, 3);
+
                 unsigned long nearestElectronIndex = nearestElectronIndexReturn(electronsPositions,
-                                                                                nucleusPosition3d);
+                                                                                nucleusPosition);
 
                 Scalar nearestElectronDistance = nearestElectronDistanceReturn();
 
@@ -49,24 +52,21 @@ namespace cppoptlib {
                 coordinates of the regarding electrons*/
                 if (nearestElectronDistance <= distanceCriteriaUmrigar) {
 
-                    //save 3d coordinates of treated nucleus
-                    nucleusPosition3d = nucleiPositions.segment(nucleusIndex * 3, 3);
-
                     //save information of the nearest electron
-                    //TODO direction3d ist ein schlechter Name, weil man nicht weiß, wovon es die Direction ist
-                    direction3d = direction.segment(nearestElectronIndex * 3, 3);
-                    stepLengthCurrent3d = stepLengthCurrent.segment(nearestElectronIndex * 3, 3);
-                    nearestElectron3d = electronsPositions.segment(nearestElectronIndex * 3, 3);
+                    //TODO directionNearestElectron ist ein schlechter Name, weil man nicht weiß, wovon es die Direction ist
+                    directionNearestElectron = direction.segment(nearestElectronIndex * 3, 3);
+                    stepLengthCurrentNearestElectron = stepLengthCurrent.segment(nearestElectronIndex * 3, 3);
+                    nearestElectron = electronsPositions.segment(nearestElectronIndex * 3, 3);
 
                     //correct step in 3d coordinate
-                    nearestElectron3d = correctStepMod(nearestElectron3d,
-                                                       nucleusPosition3d,
-                                                       direction3d,
-                                                       stepLengthCurrent3d,
+                    nearestElectron = correctStepMod(nearestElectron,
+                                                       nucleusPosition,
+                                                       directionNearestElectron,
+                                                       stepLengthCurrentNearestElectron,
                                                        nearestElectronIndex);
 
                     //correct step in 3n dimensional coordinate
-                    electronsPositionsChanged.segment(nearestElectronIndex * 3, 3) = nearestElectron3d;
+                    electronsPositionsChanged.segment(nearestElectronIndex * 3, 3) = nearestElectron;
                 }
             }
             return electronsPositionsChanged;
@@ -77,17 +77,17 @@ namespace cppoptlib {
 
             unsigned long nearestElectronIndex=indicesOfElectronsNotAtCores.front();
             assert(electronsPositions.rows() == numberOfElectrons*3);
-            Vector3d nearestElectron3d(3), electronReference3d(3);
+            Vector3d nearestElectron(3), electronReference(3);
             Scalar distanceReference;
 
-            nearestElectron3d = electronsPositions.segment(indicesOfElectronsNotAtCores.front()*3,3);
+            nearestElectron = electronsPositions.segment(indicesOfElectronsNotAtCores.front()*3,3);
 
-            smallestDistance = (nearestElectron3d-nucleusPosition3d).norm();
+            smallestDistance = (nearestElectron-nucleusPosition3d).norm();
 
             //search nearest electron and save correspondent electron number
             for(const auto& electronIndex : indicesOfElectronsNotAtCores){
-                electronReference3d = electronsPositions.segment(electronIndex*3,3);
-                distanceReference = (electronReference3d-nucleusPosition3d).norm();
+                electronReference = electronsPositions.segment(electronIndex*3,3);
+                distanceReference = (electronReference-nucleusPosition3d).norm();
                 if (distanceReference<smallestDistance){
                     smallestDistance = distanceReference;
                     nearestElectronIndex = electronIndex;

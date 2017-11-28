@@ -23,39 +23,6 @@ namespace cppoptlib {
                 step *= limitedStepLength/currentStepLength;
             }
         };
-
-        // TODO ich verstehe nicht, warum deine klasse so kompliziert ist.
-        StepLengthLimiter(Scalar maximalStepLengthValue = 1.0, Scalar rateValue = 1e-4):
-            maximalStepLength(maximalStepLengthValue),
-            rate(rateValue){};
-
-
-        TVector limitStep(const TVector &gradientCurrent) {
-            TVector stepLength =  - gradientCurrent*rate;
-            Scalar lambda = std::min(maximalStepLength,stepLength.norm());
-
-            //preventing nan as result
-            if (stepLength.norm()==0){
-                return stepLength;
-            }
-
-            TVector stepLengthNew =  lambda*stepLength/stepLength.norm();
-            return stepLengthNew;
-        }
-
-        void setMaximalStepLength(Scalar maximalStepLengthValue){
-            assert(maximalStepLengthValue > 0);
-            maximalStepLength = maximalStepLengthValue;
-        }
-
-        void setRate(Scalar rateValue){
-            assert(rateValue > 0);
-            rate = rateValue;
-        }
-
-    private:
-        Scalar rate;
-        Scalar maximalStepLength;
     };
 } /* namespace cppoptlib */
 
