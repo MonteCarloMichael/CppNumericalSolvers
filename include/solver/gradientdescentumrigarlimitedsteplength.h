@@ -47,7 +47,7 @@ namespace cppoptlib {
 
         void minimize(ProblemType &objFunc, TVector &electronsPositions0) {
 
-            UmrigarCorrector<ProblemType> umrigarCorrector(electronsPositions0.rows()/3, threshholdUmrigar);
+            UmrigarCorrector<ProblemType> umrigarCorrector(electronsPositions0.rows()/3, threshholdUmrigar, ProblemType &objFunc);
 
             Eigen::VectorXd nucleiPositions = objFunc.getNucleiPositions();
 

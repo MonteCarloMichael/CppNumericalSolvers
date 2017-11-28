@@ -17,8 +17,9 @@ namespace cppoptlib {
         using Scalar = typename ProblemType::Scalar;
         using TVector = typename ProblemType::TVector;
 
-        UmrigarCorrector(unsigned long numberOfElectrons, Scalar threshhold=1e-5)
-                : numberOfElectrons(numberOfElectrons),
+        UmrigarCorrector(unsigned long numberOfElectrons, Scalar threshhold=1e-5, ProblemType &problem)
+                : problem_(problem),
+                  numberOfElectrons(numberOfElectrons),
                   threshhold(threshhold),
                   indicesOfElectronsNotAtCores()
                 {
@@ -32,7 +33,6 @@ namespace cppoptlib {
                                   TVector &stepLengthCurrent,
                                   const TVector &nucleiPositions,
                                   Scalar distanceCriteriaUmrigar){
-
             assert(nucleiPositions.rows()%3 == 0 && "Vector dimension must be divideable by 3");
 
             Vector3d directionNearestElectron,stepLengthCurrentNearestElectron, nearestElectron, nucleusPosition;
@@ -169,6 +169,7 @@ namespace cppoptlib {
         }
 
     private:
+        ProblemType problem_;
         unsigned long numberOfElectrons;
         Scalar smallestDistance;
         Scalar threshhold;
